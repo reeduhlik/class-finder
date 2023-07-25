@@ -149,10 +149,14 @@ const App = () => {
           </button>
         </div>
       )}
-      <h1>Georgetown Course Finder F23</h1>
+
+      <div className="header">
+        <p>A Reed Uhlik production.</p>
+        <h1>Georgetown Course Finder F23</h1>
+      </div>
       <h5 className="app-subtitle">
         The best way to find classes you need. Find seats remaining and RMP
-        ratings all in one place. Blazingly Fast. Created by Reed Uhlik.
+        ratings all in one place. Blazingly Fast.
       </h5>
       <div className="searchFields">
         <input

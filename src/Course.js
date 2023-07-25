@@ -13,6 +13,10 @@ const Course = ({ course }) => {
     return formattedHour + ":" + minute + " " + ampm;
   };
 
+  const formatTitle = (title) => {
+    return title.replace(/&amp;/g, "&");
+  };
+
   const retrieveInstructorRating = (instructor) => {
     const instructorObject = instructors.find(
       (inst) => inst.instructor === instructor
@@ -57,33 +61,46 @@ const Course = ({ course }) => {
           <h3>
             {course.subjectCourse}-{course.sequenceNumber}
           </h3>
-          <h2>{unescape(course.courseTitle)}</h2>
         </div>
         <h5>CRN: {course.courseReferenceNumber}</h5>
       </div>
+      <h2>{formatTitle(course.courseTitle)}</h2>
       <div className="course-icons">
         <div className="course-icon">
           <img src="/icons/instructor.svg" alt="instructor" />
 
-          <p>
+          <a
+            target="_blank"
+            href={
+              "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
+              encodeURIComponent(course.faculty[0]?.displayName)
+            }>
             {course.faculty.length > 0
               ? course.faculty[0].displayName
               : "Not Available"}
-          </p>
+          </a>
         </div>
 
         <div className="course-icon">
           <img src="/icons/star.svg" alt="rating" />
-          <p>{course.faculty.length > 0 && rating}</p>
-          {rating !== "N/A" && rating >= 4 && (
-            <div className="color-circle-green"></div>
-          )}
-          {rating !== "N/A" && rating < 4 && rating >= 3 && (
-            <div className="color-circle-yellow"></div>
-          )}
-          {rating !== "N/A" && rating < 3 && (
-            <div className="color-circle-red"></div>
-          )}
+          <a
+            target="_blank"
+            href={
+              "https://www.ratemyprofessors.com/search/professors/355?q=" +
+              encodeURIComponent(course.faculty[0]?.displayName)
+            }>
+            {course.faculty.length > 0 && rating}
+
+            {rating !== "N/A" && rating >= 4 && (
+              <div className="color-circle-green"></div>
+            )}
+            {rating !== "N/A" && rating < 4 && rating >= 3 && (
+              <div className="color-circle-yellow"></div>
+            )}
+            {rating !== "N/A" && rating < 3 && (
+              <div className="color-circle-red"></div>
+            )}
+          </a>
         </div>
         <div className="course-icon">
           <img src="/icons/seats.svg" alt="Seats" />
@@ -122,6 +139,20 @@ const Course = ({ course }) => {
           <img src="/icons/days.svg" alt="Days" />
           <p>{formatDaysString()}</p>
         </div>
+      </div>
+      {course.seatsAvailable == 1 && (
+        <div className="course-alert">
+          <img src="/icons/alert.svg" alt="alert" />
+          <p>This class is likely full</p>
+        </div>
+      )}
+      <div className="course-attributes">
+        {course.sectionAttributes.length > 0 &&
+          course.sectionAttributes.map((attribute) => {
+            if (attribute.code != "MEAN") {
+              return <p className="course-attribute">{attribute.code}</p>;
+            }
+          })}
       </div>
     </div>
   );
