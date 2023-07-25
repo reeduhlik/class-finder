@@ -21,6 +21,7 @@ import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
 import { FaSliders } from "react-icons/fa6";
 import Toggle from "react-toggle";
+import Select from "react-select";
 
 const mergePages = () => {
   const data = page0.data.concat(
@@ -46,8 +47,48 @@ const App = () => {
   const courses = mergePages();
 
   const [filteredCourses, setFilteredCourses] = useState([]);
+  const [attributeOptions, setAttributeOptions] = useState([]);
+  const [timeOptions, setTimeOptions] = useState([
+    { value: 500, label: "5:00 AM" },
+    { value: 530, label: "5:30 AM" },
+    { value: 600, label: "6:00 AM" },
+    { value: 630, label: "6:30 AM" },
+    { value: 700, label: "7:00 AM" },
+    { value: 730, label: "7:30 AM" },
+
+    { value: 800, label: "8:00 AM" },
+    { value: 830, label: "8:30 AM" },
+    { value: 900, label: "9:00 AM" },
+    { value: 930, label: "9:30 AM" },
+    { value: 1000, label: "10:00 AM" },
+    { value: 1030, label: "10:30 AM" },
+    { value: 1100, label: "11:00 AM" },
+    { value: 1130, label: "11:30 AM" },
+    { value: 1200, label: "12:00 PM" },
+    { value: 1230, label: "12:30 PM" },
+    { value: 1300, label: "1:00 PM" },
+    { value: 1330, label: "1:30 PM" },
+    { value: 1400, label: "2:00 PM" },
+    { value: 1430, label: "2:30 PM" },
+    { value: 1500, label: "3:00 PM" },
+    { value: 1530, label: "3:30 PM" },
+    { value: 1600, label: "4:00 PM" },
+    { value: 1630, label: "4:30 PM" },
+    { value: 1700, label: "5:00 PM" },
+    { value: 1730, label: "5:30 PM" },
+    { value: 1800, label: "6:00 PM" },
+    { value: 1830, label: "6:30 PM" },
+    { value: 1900, label: "7:00 PM" },
+    { value: 1930, label: "7:30 PM" },
+    { value: 2000, label: "8:00 PM" },
+    { value: 2030, label: "8:30 PM" },
+    { value: 2100, label: "9:00 PM" },
+    { value: 2130, label: "9:30 PM" },
+    { value: 2200, label: "10:00 PM" },
+  ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [instructor, setInstructor] = useState("");
+  const [attributes, setAttributes] = useState([]);
 
   const [onlyOpen, setOnlyOpen] = useState(true);
   const [onlyGrad, setOnlyGrad] = useState(false);
@@ -58,6 +99,9 @@ const App = () => {
 
   const [records, setrecords] = useState(12);
   const [hasMore, setHasMore] = useState(true);
+
+  const [startTime, setStartTime] = useState(timeOptions[0]);
+  const [endTime, setEndTime] = useState(timeOptions[timeOptions.length - 1]);
 
   const loadMore = () => {
     if (records > filteredCourses.length) {
@@ -70,6 +114,23 @@ const App = () => {
   };
 
   useEffect(() => {
+    const usedAttributes = [];
+    courses.map((course) => {
+      course.sectionAttributes.map((attribute) => {
+        if (!usedAttributes.includes(attribute.code)) {
+          attributeOptions.push({
+            value: attribute.code,
+            label: attribute.description,
+          });
+          usedAttributes.push(attribute.code);
+        }
+      });
+    });
+    console.log(attributeOptions);
+  }, []);
+
+  useEffect(() => {
+    console.log(startTime);
     const newFilteredCourses = courses.filter((course) => {
       //business logic in here
       if (onlyOpen && course.seatsAvailable === 0) return false;
@@ -77,6 +138,43 @@ const App = () => {
       if (onlyGU && Number(course.sequenceNumber) >= 70) return false;
       if (noFriday && course.meetingsFaculty[0]?.meetingTime.friday)
         return false;
+
+      if (
+        startTime.value &&
+        course.meetingsFaculty.length > 0 &&
+        course.meetingsFaculty[0]?.meetingTime.beginTime != null &&
+        Number(course.meetingsFaculty[0]?.meetingTime.beginTime) <
+          startTime.value
+      ) {
+        console.log("start time");
+        console.log(course.meetingsFaculty[0]?.meetingTime.beginTime);
+        return false;
+      }
+
+      if (
+        endTime.value &&
+        course.meetingsFaculty.length > 0 &&
+        course.meetingsFaculty[0]?.meetingTime.endTime != null &&
+        Number(course.meetingsFaculty[0]?.meetingTime.endTime) > endTime.value
+      ) {
+        return false;
+      }
+
+      if (attributes.length > 0) {
+        for (let i = 0; i < attributes.length; i++) {
+          console.log(attributes[i]);
+          let found = false;
+          for (let j = 0; j < course.sectionAttributes.length; j++) {
+            if (attributes[i].value === course.sectionAttributes[j].code) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            return false;
+          }
+        }
+      }
 
       if (course.faculty.length > 0) {
         if (
@@ -101,7 +199,18 @@ const App = () => {
     });
     setFilteredCourses(newFilteredCourses);
     setHasMore(newFilteredCourses.length > records);
-  }, [searchTerm, instructor, onlyOpen, onlyGrad, onlyGU, noFriday, records]);
+  }, [
+    searchTerm,
+    instructor,
+    onlyOpen,
+    onlyGrad,
+    onlyGU,
+    noFriday,
+    records,
+    attributes,
+    startTime,
+    endTime,
+  ]);
 
   const expandOptions = () => {
     setOpenModal(!openModal);
@@ -144,6 +253,20 @@ const App = () => {
               onChange={() => setNoFriday(!noFriday)}
             />
           </div>
+          <p>Starting no earlier than...</p>
+          <Select
+            name="start-time"
+            options={timeOptions}
+            defaultValue={{ label: startTime.label }}
+            onChange={(e) => setStartTime(e)}
+          />
+          <p>Starting no later than...</p>
+          <Select
+            name="start-time"
+            defaultValue={{ label: endTime.label }}
+            options={timeOptions}
+            onChange={(e) => setEndTime(e)}
+          />
           <button className="toggle_modal" onClick={expandOptions}>
             Close
           </button>
@@ -168,6 +291,14 @@ const App = () => {
           type="text"
           onChange={(e) => setInstructor(e.target.value)}
           placeholder="Search by Instructor"
+        />
+        <Select
+          isMulti
+          name="attributes"
+          options={attributeOptions}
+          className="select-field"
+          onChange={(e) => setAttributes(e)}
+          placeholder="Search by Attribute"
         />
         <button className="settings" onClick={expandOptions}>
           <FaSliders />

@@ -2,9 +2,28 @@ import React from "react";
 import instructors from "./instructors";
 
 const Course = ({ course }) => {
+  const getTimeString = () => {
+    let str = "";
+    for (let i = 0; i < course.meetingsFaculty.length; i++) {
+      str +=
+        formatTimeFromMilitary(
+          course.meetingsFaculty[i].meetingTime.beginTime
+        ) +
+        " - " +
+        formatTimeFromMilitary(course.meetingsFaculty[i].meetingTime.endTime);
+      if (i < course.meetingsFaculty.length - 1) {
+        str += ", ";
+      }
+    }
+    if (str.length == 0) {
+      str = "TBA";
+    }
+    return str;
+  };
+
   const formatTimeFromMilitary = (time) => {
     if (!time) {
-      return "TBA";
+      return "";
     }
     const hour = time.substring(0, 2);
     const minute = time.substring(2, 4);
@@ -30,26 +49,44 @@ const Course = ({ course }) => {
 
   const formatDaysString = () => {
     let str = "";
-    if (course.meetingsFaculty.length > 0) {
-      if (course.meetingsFaculty[0].meetingTime.monday) {
+    for (let i = 0; i < course.meetingsFaculty.length; i++) {
+      if (course.meetingsFaculty[i].meetingTime.monday) {
         str += "M";
       }
-      if (course.meetingsFaculty[0].meetingTime.tuesday) {
+      if (course.meetingsFaculty[i].meetingTime.tuesday) {
         str += "T";
       }
-      if (course.meetingsFaculty[0].meetingTime.wednesday) {
+      if (course.meetingsFaculty[i].meetingTime.wednesday) {
         str += "W";
       }
-      if (course.meetingsFaculty[0].meetingTime.thursday) {
+      if (course.meetingsFaculty[i].meetingTime.thursday) {
         str += "Th";
       }
-      if (course.meetingsFaculty[0].meetingTime.friday) {
+      if (course.meetingsFaculty[i].meetingTime.friday) {
         str += "F";
       }
-    } else {
-      return "Not Available";
+      if (i < course.meetingsFaculty.length - 1) {
+        str += ", ";
+      }
     }
+
+    if (str.length == 0) {
+      str = "TBA";
+    }
+
     return str;
+  };
+
+  const getCreditHours = () => {
+    if (course.creditHours != null) {
+      return course.creditHours + " Credits";
+    } else if (course.creditHourLow != null) {
+      return course.creditHourLow + " Credits";
+    } else if (course.creditHourHigh != null) {
+      return course.creditHourHigh + " Credits";
+    } else {
+      return "TBA";
+    }
   };
 
   const rating = retrieveInstructorRating(course.faculty[0]?.displayName);
@@ -65,6 +102,7 @@ const Course = ({ course }) => {
         <h5>CRN: {course.courseReferenceNumber}</h5>
       </div>
       <h2>{formatTitle(course.courseTitle)}</h2>
+      <h6>{getCreditHours()}</h6>
       <div className="course-icons">
         <div className="course-icon">
           <img src="/icons/instructor.svg" alt="instructor" />
@@ -124,16 +162,7 @@ const Course = ({ course }) => {
         </div>
         <div className="course-icon">
           <img src="/icons/time.svg" alt="time" />
-          <p>
-            {course.meetingsFaculty.length > 0 &&
-              formatTimeFromMilitary(
-                course.meetingsFaculty[0].meetingTime.beginTime
-              ) +
-                " - " +
-                formatTimeFromMilitary(
-                  course.meetingsFaculty[0].meetingTime.endTime
-                )}
-          </p>
+          <p>{getTimeString()}</p>
         </div>
         <div className="course-icon">
           <img src="/icons/days.svg" alt="Days" />
