@@ -282,7 +282,7 @@ const App = () => {
       )}
 
       <div className="header">
-        <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder F23</h1>
+        <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder</h1>
       </div>
       <h5 className="app-subtitle">
         The best way to find classes you need. Find seats remaining and RMP
@@ -291,11 +291,13 @@ const App = () => {
       <div className="searchFields">
         <input
           type="text"
+          className="extra-padding"
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by Course Title, Number, or CRN"
         />
         <input
           type="text"
+          className="extra-padding"
           onChange={(e) => setInstructor(e.target.value)}
           placeholder="Search by Instructor"
         />
@@ -309,6 +311,7 @@ const App = () => {
         />
         <button className="settings" onClick={expandOptions}>
           <FaSliders />
+          <p>More Settings</p>
         </button>
       </div>
       <h2 className="main-subtitle">{filteredCourses.length} courses found!</h2>
