@@ -22,6 +22,7 @@ import { AnimationOnScroll } from "react-animation-on-scroll";
 import { FaSliders } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
+import IntroScreen from "./IntroScreen";
 
 const mergePages = () => {
   const data = page0.data.concat(
@@ -46,6 +47,7 @@ const mergePages = () => {
 const App = () => {
   const courses = mergePages();
 
+  const [showIntro, setShowIntro] = useState(true);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
   const [timeOptions, setTimeOptions] = useState([
@@ -218,64 +220,66 @@ const App = () => {
 
   return (
     <div className="App">
+      {showIntro && <IntroScreen closeModal={() => setShowIntro(false)} />}
       {openModal && (
-        <div className="options">
-          <h3>Customize your filters</h3>
-          <div className="option">
-            <p>Show only classes with seats available</p>
-            <Toggle
-              defaultChecked={onlyOpen}
-              className="toggle"
-              onChange={() => setOnlyOpen(!onlyOpen)}
+        <div className="introscreen-bg">
+          <div className="options animate__animated animate__zoomInUp animate__fast">
+            <h3>Customize your filters</h3>
+            <div className="option">
+              <p>Show only classes with seats available</p>
+              <Toggle
+                defaultChecked={onlyOpen}
+                className="toggle"
+                onChange={() => setOnlyOpen(!onlyOpen)}
+              />
+            </div>
+            <div className="option">
+              <p>Show only undergraduate classes</p>
+              <Toggle
+                defaultChecked={onlyGrad}
+                className="toggle"
+                onChange={() => setOnlyGrad(!onlyGrad)}
+              />
+            </div>
+            <div className="option">
+              <p>Hide Qatar classes</p>
+              <Toggle
+                defaultChecked={onlyGU}
+                className="toggle"
+                onChange={() => setOnlyGU(!onlyGU)}
+              />
+            </div>
+            <div className="option">
+              <p>Hide Friday classes</p>
+              <Toggle
+                defaultChecked={noFriday}
+                className="toggle"
+                onChange={() => setNoFriday(!noFriday)}
+              />
+            </div>
+            <p>Starting no earlier than...</p>
+            <Select
+              name="start-time"
+              options={timeOptions}
+              defaultValue={{ label: startTime.label }}
+              onChange={(e) => setStartTime(e)}
             />
-          </div>
-          <div className="option">
-            <p>Show only undergraduate classes</p>
-            <Toggle
-              defaultChecked={onlyGrad}
-              className="toggle"
-              onChange={() => setOnlyGrad(!onlyGrad)}
+            <p>Starting no later than...</p>
+            <Select
+              name="start-time"
+              defaultValue={{ label: endTime.label }}
+              options={timeOptions}
+              onChange={(e) => setEndTime(e)}
             />
+            <button className="toggle_modal" onClick={expandOptions}>
+              Close
+            </button>
           </div>
-          <div className="option">
-            <p>Hide Qatar classes</p>
-            <Toggle
-              defaultChecked={onlyGU}
-              className="toggle"
-              onChange={() => setOnlyGU(!onlyGU)}
-            />
-          </div>
-          <div className="option">
-            <p>Hide Friday classes</p>
-            <Toggle
-              defaultChecked={noFriday}
-              className="toggle"
-              onChange={() => setNoFriday(!noFriday)}
-            />
-          </div>
-          <p>Starting no earlier than...</p>
-          <Select
-            name="start-time"
-            options={timeOptions}
-            defaultValue={{ label: startTime.label }}
-            onChange={(e) => setStartTime(e)}
-          />
-          <p>Starting no later than...</p>
-          <Select
-            name="start-time"
-            defaultValue={{ label: endTime.label }}
-            options={timeOptions}
-            onChange={(e) => setEndTime(e)}
-          />
-          <button className="toggle_modal" onClick={expandOptions}>
-            Close
-          </button>
         </div>
       )}
 
       <div className="header">
-        <p>A Reed Uhlik production.</p>
-        <h1>Georgetown Course Finder F23</h1>
+        <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder F23</h1>
       </div>
       <h5 className="app-subtitle">
         The best way to find classes you need. Find seats remaining and RMP

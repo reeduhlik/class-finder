@@ -395,12 +395,22 @@ input[type="text"] {
 .option p{
   margin-right: 10px;
 }
+h1{
+  padding: 10px;
+  transition: .5s all;
+}
+h1:hover{
+
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.25);
+}
 
 .toggle_modal {
   border: 1px solid navy;
   background: white;
   padding: 10px 30px;
-
   margin: 0 auto;
   margin-top: 20px;
   display: block;
@@ -413,6 +423,114 @@ input[type="text"] {
   cursor: pointer;
 }
 
+
+.introscreen-bg{
+  z-index: 5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: scroll;
+
+  height: 100vh;
+  background: rgba(50,50,50,0.2);
+backdrop-filter: blur(5px);
+}
+
+.introscreen {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  margin-top: 50px;
+  align-items: center;
+  width: 80%;
+  max-width: 1200px;
+  border-radius: 15px;
+  padding: 50px;
+
+}
+.introscreen-features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 95%;
+  max-width: 900px;
+  grid-gap: 10px;
+  margin-top: 40px;
+}
+.coming-soon {
+  border: 3px solid gold;
+}
+
+.introscreen h3{
+  font-size: 32px;
+}
+
+.introscreen-feature {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  padding: 30px;
+  box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.25);
+}
+
+
+.introscreen-feature img{
+  width: 60px;
+  height: 60px;
+  margin-right: 20px;
+}
+.introscreen-feature-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.introscreen button{
+  border: 0;
+  background: navy;
+  color: white;
+  height: 50px;
+  width: 90%;
+  max-width: 300px;
+  border-radius: 5px;
+  font-size: 20px;
+  font-weight: bolder;
+  cursor: pointer;
+  transition: .3s all;
+}
+
+.introscreen button:hover {
+  filter: opacity(0.8);
+}
+
+.introscreen-feature-text h4{
+  margin: 0;
+  padding: 0;
+}
+.introscreen-feature p{
+  margin: 0;
+  padding: 0;
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: lighter;
+}
+.introscreen h2{
+  font-size: 32px;
+  margin: 0;
+  margin-bottom: 15px;
+}
+.introscreen h5{
+  margin: 0;
+  font-weight: lighter;
+  font-size: 18px;
+}
+
+.introscreen h6{
+  font-size: 20px;
+  text-align: center;
+}
+
 @media screen and (max-width: 1500px) {
   .courses{
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -422,6 +540,24 @@ input[type="text"] {
 @media screen and (max-width: 1000px) {
   .courses{
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .introscreen{
+    padding: 30px;
+  }
+
+}
+
+@media screen and (max-width: 850px) {
+  .introscreen-feature-text p {
+    display: none;
+  }
+  .introscreen-feature img{
+    width: 40px;
+    height: 40px;
+  }
+  .introscreen h6{
+    font-size: 16px;
   }
 }
   
@@ -452,12 +588,19 @@ input[type="text"] {
   .settings {
     margin-top: 20px;
   }
+  .introscreen-feature {
+    padding: 10px;
+  }
 
 }
 
 @media screen and (max-width: 500px){
   .courses{
     grid-template-columns: 1fr;
+  }
+  .introscreen-feature img{
+    width: 24px;
+    height: 24px;
   }
   h1{
     font-size: 24px;
