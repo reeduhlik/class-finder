@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Course from "./Course";
 import "./App.css";
 import page0 from "./page0.json";
@@ -14,14 +14,16 @@ import page8 from "./page8.json";
 import page9 from "./page9.json";
 import page10 from "./page10.json";
 import page11 from "./page11.json";
-import InfiniteScroll from "react-infinite-scroller";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
+import { FaSliders } from "react-icons/fa6";
+import Toggle from "react-toggle";
 
 const mergePages = () => {
-  return page0.data.concat(
+  const data = page0.data.concat(
     page1.data,
     page2.data,
     page3.data,
@@ -34,6 +36,10 @@ const mergePages = () => {
     page10.data,
     page11.data
   );
+
+  return data;
+
+  //write certain fields to csv file
 };
 
 const App = () => {
@@ -41,8 +47,14 @@ const App = () => {
 
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [department, setDepartment] = useState("");
   const [instructor, setInstructor] = useState("");
+
+  const [onlyOpen, setOnlyOpen] = useState(true);
+  const [onlyGrad, setOnlyGrad] = useState(false);
+  const [onlyGU, setOnlyGU] = useState(true);
+  const [noFriday, setNoFriday] = useState(false);
+
+  const [openModal, setOpenModal] = useState(false);
 
   const [records, setrecords] = useState(12);
   const [hasMore, setHasMore] = useState(true);
@@ -53,68 +65,129 @@ const App = () => {
     } else {
       setTimeout(() => {
         setrecords(records + 12);
-      }, 2000);
+      }, 2500);
     }
   };
 
-  const updateCourses = () => {
-    const coursesFilteredOnName = courses.filter((course) => {
-      return (
-        course.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.subjectCourse.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
+  useEffect(() => {
+    const newFilteredCourses = courses.filter((course) => {
+      //business logic in here
+      if (onlyOpen && course.seatsAvailable === 0) return false;
+      if (onlyGrad && Number(course.courseNumber) > 4999) return false;
+      if (onlyGU && Number(course.sequenceNumber) >= 70) return false;
+      if (noFriday && course.meetingsFaculty[0]?.meetingTime.friday)
+        return false;
 
-    const coursesFilteredOnInstructor = coursesFilteredOnName.filter(
-      (course) => {
-        if (instructor === "") return true;
-
-        return course.faculty.length > 0
-          ? course.faculty[0].displayName
-              .toLowerCase()
-              .includes(instructor.toLowerCase())
-          : false;
+      if (course.faculty.length > 0) {
+        if (
+          !course.faculty[0].displayName
+            .toLowerCase()
+            .includes(instructor.toLowerCase())
+        ) {
+          return false;
+        }
       }
-    );
-    setFilteredCourses(coursesFilteredOnInstructor);
-    setrecords(12);
-    setHasMore(coursesFilteredOnInstructor.length > 12);
+
+      if (course.faculty.length == 0 && instructor != "") return false;
+
+      if (
+        !course.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !course.subjectCourse.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+    setFilteredCourses(newFilteredCourses);
+    setHasMore(newFilteredCourses.length > records);
+  }, [searchTerm, instructor, onlyOpen, onlyGrad, onlyGU, noFriday, records]);
+
+  const expandOptions = () => {
+    setOpenModal(!openModal);
   };
 
   return (
     <div className="App">
+      {openModal && (
+        <div className="options">
+          <h3>Customize your filters</h3>
+          <div className="option">
+            <p>Show only classes with seats available</p>
+            <Toggle
+              defaultChecked={onlyOpen}
+              className="toggle"
+              onChange={() => setOnlyOpen(!onlyOpen)}
+            />
+          </div>
+          <div className="option">
+            <p>Show only undergraduate classes</p>
+            <Toggle
+              defaultChecked={onlyGrad}
+              className="toggle"
+              onChange={() => setOnlyGrad(!onlyGrad)}
+            />
+          </div>
+          <div className="option">
+            <p>Hide Qatar classes</p>
+            <Toggle
+              defaultChecked={onlyGU}
+              className="toggle"
+              onChange={() => setOnlyGU(!onlyGU)}
+            />
+          </div>
+          <div className="option">
+            <p>Hide Friday classes</p>
+            <Toggle
+              defaultChecked={noFriday}
+              className="toggle"
+              onChange={() => setNoFriday(!noFriday)}
+            />
+          </div>
+          <button className="toggle_modal" onClick={expandOptions}>
+            Close
+          </button>
+        </div>
+      )}
       <h1>Georgetown Course Finder F23</h1>
-      <h5>Created by Reed Uhlik.</h5>
+      <h5 className="app-subtitle">
+        The best way to find classes you need. Find seats remaining and RMP
+        ratings all in one place. Blazingly Fast. Created by Reed Uhlik.
+      </h5>
       <div className="searchFields">
         <input
           type="text"
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyUp={updateCourses}
-          placeholder="Course Title, Number, or CRN"
+          placeholder="Search by Course Title, Number, or CRN"
         />
         <input
           type="text"
           onChange={(e) => setInstructor(e.target.value)}
-          onKeyUp={updateCourses}
-          placeholder="Instructor"
+          placeholder="Search by Instructor"
         />
+        <button className="settings" onClick={expandOptions}>
+          <FaSliders />
+        </button>
       </div>
-      <h2>{filteredCourses.length} courses found!</h2>
+      <h2 className="main-subtitle">{filteredCourses.length} courses found!</h2>
       <InfiniteScroll
+        dataLength={records}
         className="courses"
-        pageStart={0}
-        loadMore={loadMore}
+        next={loadMore}
         hasMore={hasMore}
         loader={
           <div className="loader-container">
             <HashLoader loading={true} size={50} className="loader" />
             <p>Loading more classes, hang tight.</p>
           </div>
-        }
-        useWindow={false}>
+        }>
         {filteredCourses.slice(0, records).map((course, index) =>
           index > 12 ? (
-            <AnimationOnScroll animateIn="animate__zoomInUp">
+            <AnimationOnScroll
+              delay={0}
+              duration={0.5}
+              animateIn="animate__zoomIn"
+              animateOnce>
               <Course course={course} key={course.id} />
             </AnimationOnScroll>
           ) : (

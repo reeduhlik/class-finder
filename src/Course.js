@@ -1,4 +1,5 @@
 import React from "react";
+import instructors from "./instructors";
 
 const Course = ({ course }) => {
   const formatTimeFromMilitary = (time) => {
@@ -10,6 +11,17 @@ const Course = ({ course }) => {
     const formattedHour = hour % 12 || 12;
     const ampm = hour < 12 ? "AM" : "PM";
     return formattedHour + ":" + minute + " " + ampm;
+  };
+
+  const retrieveInstructorRating = (instructor) => {
+    const instructorObject = instructors.find(
+      (inst) => inst.instructor === instructor
+    );
+    if (instructorObject && instructorObject.rating !== 0) {
+      return instructorObject.rating;
+    } else {
+      return "N/A";
+    }
   };
 
   const formatDaysString = () => {
@@ -35,6 +47,9 @@ const Course = ({ course }) => {
     }
     return str;
   };
+
+  const rating = retrieveInstructorRating(course.faculty[0]?.displayName);
+
   return (
     <div className="course">
       <div className="course-top">
@@ -56,6 +71,20 @@ const Course = ({ course }) => {
               : "Not Available"}
           </p>
         </div>
+
+        <div className="course-icon">
+          <img src="/icons/star.svg" alt="rating" />
+          <p>{course.faculty.length > 0 && rating}</p>
+          {rating !== "N/A" && rating >= 4 && (
+            <div className="color-circle-green"></div>
+          )}
+          {rating !== "N/A" && rating < 4 && rating >= 3 && (
+            <div className="color-circle-yellow"></div>
+          )}
+          {rating !== "N/A" && rating < 3 && (
+            <div className="color-circle-red"></div>
+          )}
+        </div>
         <div className="course-icon">
           <img src="/icons/seats.svg" alt="Seats" />
 
@@ -64,7 +93,7 @@ const Course = ({ course }) => {
             <span className="small-text">
               {"/" + course.maximumEnrollment}{" "}
             </span>
-            Seats Remaining
+            Left
           </p>
         </div>
         <div className="course-icon">
