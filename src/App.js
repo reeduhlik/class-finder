@@ -87,6 +87,9 @@ const App = () => {
     { value: 2100, label: "9:00 PM" },
     { value: 2130, label: "9:30 PM" },
     { value: 2200, label: "10:00 PM" },
+    { value: 2230, label: "10:30 PM" },
+    { value: 2300, label: "11:00 PM" },
+    { value: 2330, label: "11:30 PM" },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [instructor, setInstructor] = useState("");
@@ -264,7 +267,7 @@ const App = () => {
               defaultValue={{ label: startTime.label }}
               onChange={(e) => setStartTime(e)}
             />
-            <p>Starting no later than...</p>
+            <p>Ending no later than...</p>
             <Select
               name="start-time"
               defaultValue={{ label: endTime.label }}
