@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import instructors from "./instructors";
 import Course from "./Course";
 import CalendarCourse from "./CalendarCourse";
 import "./App.css";
@@ -221,6 +222,7 @@ const App = () => {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [attributes, setAttributes] = useState([]);
+  const [filterConflicts, setFilterConflicts] = useState(false);
 
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [onlyGrad, setOnlyGrad] = useState(false);
@@ -289,6 +291,25 @@ const App = () => {
     }
   });
 
+  const calculateCourseRating = (course) => {
+    //find index of course in instructor array based on instructor name
+
+    let rating = 0;
+
+    const instructorIndex = instructors.findIndex(
+      (inst) => inst.instructor === course.faculty[0]?.displayName
+    );
+
+    if (instructorIndex !== -1) {
+      if (instructors[instructorIndex].rating !== 0) {
+        rating += 8 * instructors[instructorIndex].rating;
+      } else {
+        rating += 15;
+      }
+      rating += (6 - instructors[instructorIndex].difficulty) * 8;
+    }
+  };
+
   const getBackgroundColor = (course) => {
     //find index of course in selected courses
     const index = selectedCourses.findIndex((c) => c.id === course.id);
@@ -302,6 +323,56 @@ const App = () => {
       if (onlyOpen && course.seatsAvailable === 0) return false;
       if (onlyGrad && Number(course.courseNumber) > 4999) return false;
       if (onlyGU && Number(course.sequenceNumber) >= 70) return false;
+
+      //filter out courses with schedule conflicts
+      if (filterConflicts) {
+        let conflict = false;
+
+        selectedCourses.forEach((selectedCourse) => {
+          if (
+            selectedCourse.meetingsFaculty.length > 0 &&
+            course.meetingsFaculty.length > 0
+          ) {
+            if (
+              (selectedCourse.meetingsFaculty[0].meetingTime.monday &&
+                course.meetingsFaculty[0].meetingTime.monday) ||
+              (selectedCourse.meetingsFaculty[0].meetingTime.tuesday &&
+                course.meetingsFaculty[0].meetingTime.tuesday) ||
+              (selectedCourse.meetingsFaculty[0].meetingTime.wednesday &&
+                course.meetingsFaculty[0].meetingTime.wednesday) ||
+              (selectedCourse.meetingsFaculty[0].meetingTime.thursday &&
+                course.meetingsFaculty[0].meetingTime.thursday) ||
+              (selectedCourse.meetingsFaculty[0].meetingTime.friday &&
+                course.meetingsFaculty[0].meetingTime.friday)
+            ) {
+              if (
+                Number(
+                  course.meetingsFaculty[0].meetingTime.beginTime >=
+                    Number(
+                      selectedCourse.meetingsFaculty[0].meetingTime.beginTime
+                    ) &&
+                    Number(course.meetingsFaculty[0].meetingTime.beginTime) <=
+                      Number(
+                        selectedCourse.meetingsFaculty[0].meetingTime.endTime
+                      )
+                ) ||
+                (Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                  Number(
+                    selectedCourse.meetingsFaculty[0].meetingTime.beginTime
+                  ) &&
+                  Number(course.meetingsFaculty[0].meetingTime.endTime) <=
+                    Number(
+                      selectedCourse.meetingsFaculty[0].meetingTime.endTime
+                    ))
+              ) {
+                conflict = true;
+              }
+            }
+          }
+        });
+        if (conflict) return false;
+      }
+
       if (noFriday && course.meetingsFaculty[0]?.meetingTime.friday)
         return false;
 
@@ -359,6 +430,7 @@ const App = () => {
 
       return true;
     });
+
     setFilteredCourses(newFilteredCourses);
     setHasMore(newFilteredCourses.length > records);
   }, [
@@ -371,6 +443,8 @@ const App = () => {
     attributes,
     startTime,
     endTime,
+    filterConflicts,
+    selectedCourses,
   ]);
 
   const expandOptions = () => {
@@ -455,6 +529,14 @@ const App = () => {
                 defaultChecked={onlyGrad}
                 className="toggle"
                 onChange={() => setOnlyGrad(!onlyGrad)}
+              />
+            </div>
+            <div className="option">
+              <p>Hide classes with schedule conflict</p>
+              <Toggle
+                defaultChecked={filterConflicts}
+                className="toggle"
+                onChange={() => setFilterConflicts(!filterConflicts)}
               />
             </div>
             <div className="option">
@@ -578,7 +660,7 @@ const App = () => {
               </div>
               {days.map((day) => (
                 <div className="calendar-day">
-                  <p>Mon</p>
+                  <p>{day}</p>
                   {times.map((time, index) => {
                     //if any selected courses have a meeting at this time, display it
                     const coursesAtTime = selectedCourses.filter((course) => {

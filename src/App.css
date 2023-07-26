@@ -10,9 +10,9 @@ body{
 }
 
 .header img{
-  height: 44px;
+  height: 36px;
   margin: -10px;
-  margin-bottom: -25px;
+  margin-bottom: -45px;
   padding: 15px;
   transition: .5s all;
 }

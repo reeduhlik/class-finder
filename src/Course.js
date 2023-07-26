@@ -3,6 +3,20 @@ import instructors from "./instructors";
 import "animate.css";
 
 const Course = ({ course, func }) => {
+  const calculateCourseRating = (course) => {
+    //find index of course in instructor array based on instructor name
+    const instructorIndex = instructors.findIndex(
+      (inst) => inst.instructor === course.faculty[0]?.displayName
+    );
+    if (instructorIndex === -1) {
+      return "N/A";
+    } else {
+      return (
+        10 * instructors[instructorIndex].rating +
+        (6 - instructors[instructorIndex].difficulty) * 10
+      );
+    }
+  };
   const getTimeString = () => {
     let str = "";
     for (let i = 0; i < course.meetingsFaculty.length; i++) {
@@ -168,6 +182,7 @@ const Course = ({ course, func }) => {
                 course.meetingsFaculty[0].meetingTime.room}
           </p>
         </div>
+
         <div className="course-icon">
           <img src="/icons/time.svg" alt="time" />
           <p>{getTimeString()}</p>
