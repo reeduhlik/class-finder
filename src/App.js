@@ -25,6 +25,7 @@ import {
   FaArrowRightToBracket,
   FaRegCalendar,
   FaCopy,
+  FaBars,
 } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
@@ -374,15 +375,20 @@ const App = () => {
   return (
     <div className="App">
       <div className="icons">
-        <div
-          className="icon-row"
-          onClick={() => setShowShortcuts(!showShortcuts)}>
-          <h6 className="keyboard-outline">[</h6>
-          <h4>
-            <FaArrowRightToBracket />
-          </h4>
-          <p>Toggle Shortcuts</p>
-        </div>
+        {!showShortcuts && (
+          <FaBars onClick={() => setShowShortcuts(!showShortcuts)} />
+        )}
+        {showShortcuts && (
+          <div
+            className="icon-row"
+            onClick={() => setShowShortcuts(!showShortcuts)}>
+            <h6 className="keyboard-outline">[</h6>
+            <h4>
+              <FaArrowRightToBracket />
+            </h4>
+            <p>Toggle Shortcuts</p>
+          </div>
+        )}
         {showShortcuts && (
           <div className="icon-row" onClick={() => setOpenModal(true)}>
             <h6 className="keyboard-outline">]</h6>

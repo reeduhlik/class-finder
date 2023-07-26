@@ -60,6 +60,7 @@ body{
   max-width: 1500px;
   margin: 0 auto;
   grid-gap: 15px;
+  margin-bottom: 50px;
 }
 .course{
   padding: 25px;
@@ -77,14 +78,19 @@ body{
 .content{
   display: flex;
   width: 95%;
+  overflow: auto;
   flex-direction: column;
   transition: .5s all;
+}
+.content::-webkit-scrollbar {
+  display: none;
 }
 .container{
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
+
 }
 
 .right{
