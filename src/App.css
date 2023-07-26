@@ -82,7 +82,7 @@ body{
   flex-direction: column;
   transition: .5s all;
 }
-.content::-webkit-scrollbar {
+.content::-webkit-scrollbar, html::-webkit-scrollbar, .right::-webkit-scrollbar {
   display: none;
 }
 .container{
