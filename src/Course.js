@@ -1,5 +1,6 @@
 import React from "react";
 import instructors from "./instructors";
+import "animate.css";
 
 const Course = ({ course, func }) => {
   const getTimeString = () => {
@@ -92,7 +93,9 @@ const Course = ({ course, func }) => {
   const rating = retrieveInstructorRating(course.faculty[0]?.displayName);
 
   return (
-    <div className="course" onClick={func}>
+    <div
+      className="course animate__animated animate__zoomInUp animate__fast"
+      onClick={func}>
       <div className="course-top">
         <div className="course-top-left">
           <h3>

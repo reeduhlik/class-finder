@@ -26,6 +26,7 @@ import {
   FaRegCalendar,
   FaCopy,
   FaBars,
+  FaMagnifyingGlass,
 } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
@@ -234,8 +235,8 @@ const App = () => {
       setHasMore(false);
     } else {
       setTimeout(() => {
-        setrecords(records + 12);
-      }, 2500);
+        setrecords(records + 6);
+      }, 1000);
     }
   };
 
@@ -276,6 +277,8 @@ const App = () => {
       setOpenModal(!openModal);
     } else if (e.key === ";") {
       onCopyClick();
+    } else if (e.key === "Escape") {
+      setShowShortcuts(false);
     }
   });
 
@@ -332,21 +335,19 @@ const App = () => {
         }
       }
 
-      if (course.faculty.length > 0) {
-        if (
-          !course.faculty[0].displayName
-            .toLowerCase()
-            .includes(instructor.toLowerCase())
-        ) {
-          return false;
-        }
-      }
-
-      if (course.faculty.length == 0 && instructor != "") return false;
+      if (course.faculty.length === 0 && instructor !== "") return false;
 
       if (
         !course.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !course.subjectCourse.toLowerCase().includes(searchTerm.toLowerCase())
+        !course.subjectCourse
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) &&
+        !course.courseReferenceNumber
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) &&
+        !course.faculty[0]?.displayName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       ) {
         return false;
       }
@@ -357,7 +358,6 @@ const App = () => {
     setHasMore(newFilteredCourses.length > records);
   }, [
     searchTerm,
-    instructor,
     onlyOpen,
     onlyGrad,
     onlyGU,
@@ -376,7 +376,10 @@ const App = () => {
     <div className="App">
       <div className="icons">
         {!showShortcuts && (
-          <FaBars onClick={() => setShowShortcuts(!showShortcuts)} />
+          <FaBars
+            className="icon-bar"
+            onClick={() => setShowShortcuts(!showShortcuts)}
+          />
         )}
         {showShortcuts && (
           <div
@@ -386,7 +389,7 @@ const App = () => {
             <h4>
               <FaArrowRightToBracket />
             </h4>
-            <p>Toggle Shortcuts</p>
+            <p>Toggle Menu</p>
           </div>
         )}
         {showShortcuts && (
@@ -479,6 +482,15 @@ const App = () => {
               options={timeOptions}
               onChange={(e) => setEndTime(e)}
             />
+            <p>Filter by attribute</p>
+            <Select
+              isMulti
+              name="attributes"
+              defaultValue={attributes}
+              options={attributeOptions}
+              onChange={(e) => setAttributes(e)}
+              placeholder="Filter by Attribute"
+            />
             <button className="toggle_modal" onClick={expandOptions}>
               Close
             </button>
@@ -495,29 +507,19 @@ const App = () => {
             ratings all in one place. Blazingly Fast.
           </h5>
           <div className="searchFields">
-            <input
-              type="text"
-              className="extra-padding"
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by Course Title, Number, or CRN"
-            />
-            <input
-              type="text"
-              className="extra-padding"
-              onChange={(e) => setInstructor(e.target.value)}
-              placeholder="Search by Instructor"
-            />
-            <Select
-              isMulti
-              name="attributes"
-              options={attributeOptions}
-              className="select-field"
-              onChange={(e) => setAttributes(e)}
-              placeholder="Search by Attribute"
-            />
+            <div className="wrapper-input">
+              <input
+                type="text"
+                className="main-input extra-padding"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by Course Title, Instructor, or Code"
+              />
+              <FaMagnifyingGlass className="input-logo" />
+            </div>
+
             <button className="settings" onClick={expandOptions}>
               <FaSliders />
-              <p>Settings</p>
+              <p>More</p>
             </button>
           </div>
           <h2 className="main-subtitle">
@@ -534,36 +536,20 @@ const App = () => {
                 <p>Loading more classes, hang tight.</p>
               </div>
             }>
-            {filteredCourses.slice(0, records).map((course, index) =>
-              index > 12 ? (
-                <AnimationOnScroll
-                  delay={0}
-                  duration={0.5}
-                  animateIn="animate__zoomIn"
-                  animateOnce>
-                  <Course
-                    course={course}
-                    key={course.id}
-                    func={() => addCourse(course)}
-                  />
-                </AnimationOnScroll>
-              ) : (
-                <Course
-                  course={course}
-                  key={course.id}
-                  func={() => addCourse(course)}
-                />
-              )
-            )}
+            {filteredCourses.slice(0, records).map((course, index) => (
+              <Course
+                course={course}
+                key={course.id}
+                func={() => addCourse(course)}
+              />
+            ))}
           </InfiniteScroll>
         </div>
         {showCalendar && (
           <div className="right animate__animated animate__slideInRight">
             <h4
               className="calendar-close"
-              onClick={() => setShowCalendar(false)}>
-              <FaArrowRightToBracket />
-            </h4>
+              onClick={() => setShowCalendar(false)}></h4>
             <h2>Your Calendar</h2>
             <h4>{getCreditNumber()}</h4>
             <div className="calendar">
