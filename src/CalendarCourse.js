@@ -1,7 +1,7 @@
 import React from "react";
 import instructors from "./instructors";
 
-const Course = ({ course, func }) => {
+const CalendarCourse = ({ course, func, color }) => {
   const getTimeString = () => {
     let str = "";
     for (let i = 0; i < course.meetingsFaculty.length; i++) {
@@ -93,6 +93,7 @@ const Course = ({ course, func }) => {
 
   return (
     <div className="course" onClick={func}>
+      <div className="course-color" style={{ backgroundColor: color }}></div>
       <div className="course-top">
         <div className="course-top-left">
           <h3>
@@ -187,4 +188,4 @@ const Course = ({ course, func }) => {
   );
 };
 
-export default Course;
+export default CalendarCourse;

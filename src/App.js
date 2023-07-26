@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Course from "./Course";
+import CalendarCourse from "./CalendarCourse";
 import "./App.css";
 import page0 from "./page0.json";
 import page1 from "./page1.json";
@@ -19,7 +20,11 @@ import { HashLoader } from "react-spinners";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
-import { FaSliders } from "react-icons/fa6";
+import {
+  FaSliders,
+  FaArrowRightToBracket,
+  FaRegCalendar,
+} from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
 import IntroScreen from "./IntroScreen";
@@ -45,11 +50,84 @@ const mergePages = () => {
 };
 
 const App = () => {
+  const formatMilitaryTime = (time) => {
+    if (!time) {
+      return "";
+    }
+    const hour = time.substring(0, 2);
+    const minute = time.substring(2, 4);
+    const formattedHour = hour % 12 || 12;
+    const ampm = hour < 12 ? "AM" : "PM";
+    return formattedHour + ":" + minute + " " + ampm;
+  };
   const courses = mergePages();
 
   const [showIntro, setShowIntro] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(true);
+  const [selectedCourses, setSelectedCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
+  const [calendar, setCalendar] = useState([]);
+
+  const times = [
+    "600",
+    "630",
+    "700",
+    "730",
+    "800",
+    "830",
+    "900",
+    "930",
+    "1000",
+    "1030",
+    "1100",
+    "1130",
+    "1200",
+    "1230",
+    "1300",
+    "1330",
+    "1400",
+    "1430",
+    "1500",
+    "1530",
+    "1600",
+    "1630",
+    "1700",
+    "1730",
+    "1800",
+    "1830",
+    "1900",
+    "1930",
+    "2000",
+    "2030",
+    "2100",
+    "2130",
+    "2200",
+    "2230",
+    "2300",
+    "2330",
+  ];
+
+  const colors = ["#FFC857", "#3ABECF", "#F9B9F2", "#60579E", "#D64933"];
+
+  const days = ["M", "T", "W", "Th", "F"];
+
+  const getCreditNumber = () => {
+    //add credit numbers together of selected courses
+    let credits = 0;
+
+    selectedCourses.forEach((course) => {
+      if (course.creditHours != null) {
+        credits += course.creditHours;
+      } else if (course.creditHourLow != null) {
+        credits += course.creditHourLow;
+      } else if (course.creditHourHigh != null) {
+        credits += course.creditHourHigh;
+      }
+    });
+    return credits + " Credits";
+  };
+
   const [timeOptions, setTimeOptions] = useState([
     { value: 500, label: "5:00 AM" },
     { value: 530, label: "5:30 AM" },
@@ -100,6 +178,8 @@ const App = () => {
   const [onlyGU, setOnlyGU] = useState(true);
   const [noFriday, setNoFriday] = useState(false);
 
+  const [showShortcuts, setShowShortcuts] = useState(true);
+
   const [openModal, setOpenModal] = useState(false);
 
   const [records, setrecords] = useState(12);
@@ -118,6 +198,16 @@ const App = () => {
     }
   };
 
+  const addCourse = (course) => {
+    if (!selectedCourses.includes(course)) {
+      setSelectedCourses([...selectedCourses, course]);
+    }
+  };
+
+  const removeCourse = (course) => {
+    setSelectedCourses(selectedCourses.filter((c) => c.id !== course.id));
+  };
+
   useEffect(() => {
     const usedAttributes = [];
     courses.map((course) => {
@@ -131,8 +221,26 @@ const App = () => {
         }
       });
     });
-    console.log(attributeOptions);
   }, []);
+
+  document.addEventListener("keydown", (e) => {
+    console.log(e.key);
+    if (e.key === "/") {
+      setShowCalendar(!showCalendar);
+    } else if (e.key === ".") {
+      setShowIntro(!showIntro);
+    } else if (e.key === "[") {
+      setShowShortcuts(!showShortcuts);
+    } else if (e.key === "]") {
+      setOpenModal(!openModal);
+    }
+  });
+
+  const getBackgroundColor = (course) => {
+    //find index of course in selected courses
+    const index = selectedCourses.findIndex((c) => c.id === course.id);
+    return colors[index % colors.length];
+  };
 
   useEffect(() => {
     console.log(startTime);
@@ -223,6 +331,46 @@ const App = () => {
 
   return (
     <div className="App">
+      <div className="icons">
+        <div
+          className="icon-row"
+          onClick={() => setShowShortcuts(!showShortcuts)}>
+          <h6 className="keyboard-outline">[</h6>
+          <h4>
+            <FaArrowRightToBracket />
+          </h4>
+          <p>Toggle Shortcuts</p>
+        </div>
+        {showShortcuts && (
+          <div className="icon-row" onClick={() => setOpenModal(true)}>
+            <h6 className="keyboard-outline">]</h6>
+            <h4>
+              <FaSliders />
+            </h4>
+            <p>Open Settings</p>
+          </div>
+        )}
+        {showShortcuts && (
+          <div
+            className="icon-row"
+            onClick={() => setShowCalendar(!showCalendar)}>
+            <h6 className="keyboard-outline">/</h6>
+            <h4>
+              <FaRegCalendar />
+            </h4>
+            <p>Toggle Calendar</p>
+          </div>
+        )}
+        {showShortcuts && (
+          <div className="icon-row" onClick={() => setShowIntro(!showIntro)}>
+            <h6 className="keyboard-outline">.</h6>
+            <h4>
+              <FaArrowRightToBracket />
+            </h4>
+            <p>Toggle Intro Screen</p>
+          </div>
+        )}
+      </div>
       {showIntro && <IntroScreen closeModal={() => setShowIntro(false)} />}
       {openModal && (
         <div className="introscreen-bg">
@@ -280,66 +428,398 @@ const App = () => {
           </div>
         </div>
       )}
-
-      <div className="header">
-        <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder</h1>
-      </div>
-      <h5 className="app-subtitle">
-        The best way to find classes you need. Find seats remaining and RMP
-        ratings all in one place. Blazingly Fast.
-      </h5>
-      <div className="searchFields">
-        <input
-          type="text"
-          className="extra-padding"
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search by Course Title, Number, or CRN"
-        />
-        <input
-          type="text"
-          className="extra-padding"
-          onChange={(e) => setInstructor(e.target.value)}
-          placeholder="Search by Instructor"
-        />
-        <Select
-          isMulti
-          name="attributes"
-          options={attributeOptions}
-          className="select-field"
-          onChange={(e) => setAttributes(e)}
-          placeholder="Search by Attribute"
-        />
-        <button className="settings" onClick={expandOptions}>
-          <FaSliders />
-          <p>More Settings</p>
-        </button>
-      </div>
-      <h2 className="main-subtitle">{filteredCourses.length} courses found!</h2>
-      <InfiniteScroll
-        dataLength={records}
-        className="courses"
-        next={loadMore}
-        hasMore={hasMore}
-        loader={
-          <div className="loader-container">
-            <HashLoader loading={true} size={50} className="loader" />
-            <p>Loading more classes, hang tight.</p>
+      <div className="container">
+        <div className="content">
+          <div className="header">
+            <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder</h1>
           </div>
-        }>
-        {filteredCourses.slice(0, records).map((course, index) =>
-          index > 12 ? (
-            <AnimationOnScroll
-              delay={0}
-              duration={0.5}
-              animateIn="animate__zoomIn"
-              animateOnce>
-              <Course course={course} key={course.id} />
-            </AnimationOnScroll>
-          ) : (
-            <Course course={course} key={course.id} />
-          )
+          <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
+            The best way to find classes you need. Find seats remaining and RMP
+            ratings all in one place. Blazingly Fast.
+          </h5>
+          <div className="searchFields">
+            <input
+              type="text"
+              className="extra-padding"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by Course Title, Number, or CRN"
+            />
+            <input
+              type="text"
+              className="extra-padding"
+              onChange={(e) => setInstructor(e.target.value)}
+              placeholder="Search by Instructor"
+            />
+            <Select
+              isMulti
+              name="attributes"
+              options={attributeOptions}
+              className="select-field"
+              onChange={(e) => setAttributes(e)}
+              placeholder="Search by Attribute"
+            />
+            <button className="settings" onClick={expandOptions}>
+              <FaSliders />
+              <p>Settings</p>
+            </button>
+          </div>
+          <h2 className="main-subtitle">
+            {filteredCourses.length} courses found!
+          </h2>
+          <InfiniteScroll
+            dataLength={records}
+            className="courses"
+            next={loadMore}
+            hasMore={hasMore}
+            loader={
+              <div className="loader-container">
+                <HashLoader loading={true} size={50} className="loader" />
+                <p>Loading more classes, hang tight.</p>
+              </div>
+            }>
+            {filteredCourses.slice(0, records).map((course, index) =>
+              index > 12 ? (
+                <AnimationOnScroll
+                  delay={0}
+                  duration={0.5}
+                  animateIn="animate__zoomIn"
+                  animateOnce>
+                  <Course
+                    course={course}
+                    key={course.id}
+                    func={() => addCourse(course)}
+                  />
+                </AnimationOnScroll>
+              ) : (
+                <Course
+                  course={course}
+                  key={course.id}
+                  func={() => addCourse(course)}
+                />
+              )
+            )}
+          </InfiniteScroll>
+        </div>
+        {showCalendar && (
+          <div className="right animate__animated animate__slideInRight">
+            <h4
+              className="calendar-close"
+              onClick={() => setShowCalendar(false)}>
+              <FaArrowRightToBracket />
+            </h4>
+            <h2>Your Calendar</h2>
+            <h4>{getCreditNumber()}</h4>
+            <div className="calendar">
+              <div className="calendar-day slot-label-column">
+                <p>.</p>
+                {times.map((time, index) => {
+                  if (index % 2 === 0) {
+                    return (
+                      <div className="calendar-slot slot-label border-top">
+                        {(Number(time) / 100) % 12 || 12}
+                      </div>
+                    );
+                  } else {
+                    return <div className="calendar-slot slot-label"></div>;
+                  }
+                })}
+              </div>
+              <div className="calendar-day">
+                <p>Mon</p>
+                {times.map((time, index) => {
+                  //if any selected courses have a meeting at this time, display it
+                  const coursesAtTime = selectedCourses.filter((course) => {
+                    if (course.meetingsFaculty.length > 0) {
+                      return (
+                        course.meetingsFaculty[0].meetingTime.monday &&
+                        Number(
+                          course.meetingsFaculty[0].meetingTime.beginTime
+                        ) <= Number(time) &&
+                        Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                          Number(time)
+                      );
+                    }
+                  });
+                  if (coursesAtTime.length === 0) {
+                    return (
+                      <div
+                        className={
+                          index % 2 === 0
+                            ? "calendar-slot slot-empty  border-top"
+                            : "calendar-slot slot-empty"
+                        }></div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="calendar-slot slot-filled"
+                        style={{
+                          backgroundColor: getBackgroundColor(coursesAtTime[0]),
+                        }}>
+                        {" "}
+                        <div className="calendar-tooltip">
+                          <h5>{coursesAtTime[0].courseTitle}</h5>
+                          <h6>
+                            {coursesAtTime[0].subject} -{" "}
+                            {coursesAtTime[0].courseNumber}
+                          </h6>
+                          <h6>
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .beginTime
+                            )}{" "}
+                            -{" "}
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .endTime
+                            )}
+                          </h6>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className="calendar-day">
+                <p>Tues</p>
+                {times.map((time, index) => {
+                  //if any selected courses have a meeting at this time, display it
+                  const coursesAtTime = selectedCourses.filter((course) => {
+                    if (course.meetingsFaculty.length > 0) {
+                      return (
+                        course.meetingsFaculty[0].meetingTime.tuesday &&
+                        Number(
+                          course.meetingsFaculty[0].meetingTime.beginTime
+                        ) <= Number(time) &&
+                        Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                          Number(time)
+                      );
+                    }
+                  });
+                  if (coursesAtTime.length === 0) {
+                    return (
+                      <div
+                        className={
+                          index % 2 === 0
+                            ? "calendar-slot slot-empty  border-top"
+                            : "calendar-slot slot-empty"
+                        }></div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="calendar-slot slot-filled"
+                        style={{
+                          backgroundColor: getBackgroundColor(coursesAtTime[0]),
+                        }}>
+                        {" "}
+                        <div className="calendar-tooltip">
+                          <h5>{coursesAtTime[0].courseTitle}</h5>
+                          <h6>
+                            {coursesAtTime[0].subject} -{" "}
+                            {coursesAtTime[0].courseNumber}
+                          </h6>
+                          <h6>
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .beginTime
+                            )}{" "}
+                            -{" "}
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .endTime
+                            )}
+                          </h6>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className="calendar-day">
+                <p>Wed</p>
+                {times.map((time, index) => {
+                  //if any selected courses have a meeting at this time, display it
+                  const coursesAtTime = selectedCourses.filter((course) => {
+                    if (course.meetingsFaculty.length > 0) {
+                      return (
+                        course.meetingsFaculty[0].meetingTime.wednesday &&
+                        Number(
+                          course.meetingsFaculty[0].meetingTime.beginTime
+                        ) <= Number(time) &&
+                        Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                          Number(time)
+                      );
+                    }
+                  });
+                  if (coursesAtTime.length === 0) {
+                    return (
+                      <div
+                        className={
+                          index % 2 === 0
+                            ? "calendar-slot slot-empty  border-top"
+                            : "calendar-slot slot-empty"
+                        }></div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="calendar-slot slot-filled"
+                        style={{
+                          backgroundColor: getBackgroundColor(coursesAtTime[0]),
+                        }}>
+                        {" "}
+                        <div className="calendar-tooltip">
+                          <h5>{coursesAtTime[0].courseTitle}</h5>
+                          <h6>
+                            {coursesAtTime[0].subject} -{" "}
+                            {coursesAtTime[0].courseNumber}
+                          </h6>
+                          <h6>
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .beginTime
+                            )}{" "}
+                            -{" "}
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .endTime
+                            )}
+                          </h6>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className="calendar-day">
+                <p>Thurs</p>
+                {times.map((time, index) => {
+                  //if any selected courses have a meeting at this time, display it
+                  const coursesAtTime = selectedCourses.filter((course) => {
+                    if (course.meetingsFaculty.length > 0) {
+                      return (
+                        course.meetingsFaculty[0].meetingTime.thursday &&
+                        Number(
+                          course.meetingsFaculty[0].meetingTime.beginTime
+                        ) <= Number(time) &&
+                        Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                          Number(time)
+                      );
+                    }
+                  });
+                  if (coursesAtTime.length === 0) {
+                    return (
+                      <div
+                        className={
+                          index % 2 === 0
+                            ? "calendar-slot slot-empty  border-top"
+                            : "calendar-slot slot-empty"
+                        }></div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="calendar-slot slot-filled"
+                        style={{
+                          backgroundColor: getBackgroundColor(coursesAtTime[0]),
+                        }}>
+                        {" "}
+                        <div className="calendar-tooltip">
+                          <h5>{coursesAtTime[0].courseTitle}</h5>
+                          <h6>
+                            {coursesAtTime[0].subject} -{" "}
+                            {coursesAtTime[0].courseNumber}
+                          </h6>
+                          <h6>
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .beginTime
+                            )}{" "}
+                            -{" "}
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .endTime
+                            )}
+                          </h6>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+              <div className="calendar-day">
+                <p>Fri</p>
+                {times.map((time, index) => {
+                  //if any selected courses have a meeting at this time, display it
+                  const coursesAtTime = selectedCourses.filter((course) => {
+                    if (course.meetingsFaculty.length > 0) {
+                      return (
+                        course.meetingsFaculty[0].meetingTime.friday &&
+                        Number(
+                          course.meetingsFaculty[0].meetingTime.beginTime
+                        ) <= Number(time) &&
+                        Number(course.meetingsFaculty[0].meetingTime.endTime) >=
+                          Number(time)
+                      );
+                    }
+                  });
+                  if (coursesAtTime.length === 0) {
+                    return (
+                      <div
+                        className={
+                          index % 2 === 0
+                            ? "calendar-slot slot-empty  border-top"
+                            : "calendar-slot slot-empty"
+                        }></div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        className="calendar-slot slot-filled"
+                        style={{
+                          backgroundColor: getBackgroundColor(coursesAtTime[0]),
+                        }}>
+                        {" "}
+                        <div className="calendar-tooltip">
+                          <h5>{coursesAtTime[0].courseTitle}</h5>
+                          <h6>
+                            {coursesAtTime[0].subject} -{" "}
+                            {coursesAtTime[0].courseNumber}
+                          </h6>
+                          <h6>
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .beginTime
+                            )}{" "}
+                            -{" "}
+                            {formatMilitaryTime(
+                              coursesAtTime[0].meetingsFaculty[0].meetingTime
+                                .endTime
+                            )}
+                          </h6>
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            </div>
+            <h2>Your Selected Courses</h2>
+            <p className="right-subtitle">Click on a course to reomve it.</p>
+            <div className="selected-courses">
+              {selectedCourses.map((course, index) => (
+                <CalendarCourse
+                  color={getBackgroundColor(course)}
+                  course={course}
+                  key={course.id}
+                  func={() => removeCourse(course)}
+                />
+              ))}
+            </div>
+          </div>
         )}
-      </InfiniteScroll>
+      </div>
     </div>
   );
 };

@@ -69,10 +69,6 @@ const IntroScreen = (props) => {
             </div>
           </div>
         </div>
-        <h6>
-          Finding it useful? Venmo @reed-uhlik to say thanks and help support
-          development!
-        </h6>
         <button onClick={props.closeModal}>Get Started!</button>
       </div>
     </div>
