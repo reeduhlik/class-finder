@@ -80,10 +80,10 @@ const Course = ({ course, func }) => {
   const getCreditHours = () => {
     if (course.creditHours != null) {
       return course.creditHours + " Credits";
-    } else if (course.creditHourLow != null) {
-      return course.creditHourLow + " Credits";
     } else if (course.creditHourHigh != null) {
       return course.creditHourHigh + " Credits";
+    } else if (course.creditHourLow != null) {
+      return course.creditHourLow + " Credits";
     } else {
       return "TBA";
     }
@@ -150,6 +150,11 @@ const Course = ({ course, func }) => {
             </span>
             Left
           </p>
+          <p>
+            <span className="large-text">{course.waitAvailable}</span>
+            <span className="small-text">{"/" + course.waitCapacity} </span>
+            WL
+          </p>
         </div>
         <div className="course-icon">
           <img src="/icons/location.svg" alt="location" />
@@ -169,10 +174,16 @@ const Course = ({ course, func }) => {
           <p>{formatDaysString()}</p>
         </div>
       </div>
-      {course.seatsAvailable == 1 && (
+      {course.seatsAvailable == 1 && course.waitCount > 0 && (
         <div className="course-alert">
           <img src="/icons/alert.svg" alt="alert" />
-          <p>This class is likely full</p>
+          <p>Open seat likely from WL</p>
+        </div>
+      )}
+      {course.seatsAvailable == 0 && (
+        <div className="course-warning">
+          <img src="/icons/alert.svg" alt="alert" />
+          <p>Course is full :(</p>
         </div>
       )}
       <div className="course-attributes">

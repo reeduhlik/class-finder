@@ -93,7 +93,6 @@ const CalendarCourse = ({ course, func, color }) => {
 
   return (
     <div className="course" onClick={func}>
-      <div className="course-color" style={{ backgroundColor: color }}></div>
       <div className="course-top">
         <div className="course-top-left">
           <h3>
@@ -151,6 +150,11 @@ const CalendarCourse = ({ course, func, color }) => {
             </span>
             Left
           </p>
+          <p>
+            <span className="large-text">{course.waitAvailable}</span>
+            <span className="small-text">{"/" + course.waitCapacity} </span>
+            WL
+          </p>
         </div>
         <div className="course-icon">
           <img src="/icons/location.svg" alt="location" />
@@ -170,20 +174,18 @@ const CalendarCourse = ({ course, func, color }) => {
           <p>{formatDaysString()}</p>
         </div>
       </div>
-      {course.seatsAvailable == 1 && (
+      {course.seatsAvailable == 1 && course.waitCount > 0 && (
         <div className="course-alert">
           <img src="/icons/alert.svg" alt="alert" />
-          <p>This class is likely full</p>
+          <p>Open seat likely from WL</p>
         </div>
       )}
-      <div className="course-attributes">
-        {course.sectionAttributes.length > 0 &&
-          course.sectionAttributes.map((attribute) => {
-            if (attribute.code != "MEAN") {
-              return <p className="course-attribute">{attribute.code}</p>;
-            }
-          })}
-      </div>
+      {course.seatsAvailable == 0 && (
+        <div className="course-warning">
+          <img src="/icons/alert.svg" alt="alert" />
+          <p>Course is full :(</p>
+        </div>
+      )}
     </div>
   );
 };
