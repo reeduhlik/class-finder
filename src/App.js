@@ -17,6 +17,7 @@ import page10 from "./page10.json";
 import page11 from "./page11.json";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
+import { inject } from "@vercel/analytics";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
@@ -53,6 +54,7 @@ const mergePages = () => {
 };
 
 const App = () => {
+  inject();
   const formatMilitaryTime = (time) => {
     if (!time) {
       return "";
@@ -74,7 +76,6 @@ const App = () => {
   });
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
-  const [calendar, setCalendar] = useState([]);
 
   const times = [
     "600",
@@ -115,7 +116,14 @@ const App = () => {
     "2330",
   ];
 
-  const colors = ["#FFC857", "#3ABECF", "#F9B9F2", "#60579E", "#D64933"];
+  const colors = [
+    "#FFC857",
+    "#3ABECF",
+    "#F9B9F2",
+    "#8089b3",
+    "#D64933",
+    "#bc5000",
+  ];
 
   const days = ["M", "T", "W", "Th", "F"];
 
@@ -161,10 +169,10 @@ const App = () => {
     selectedCourses.forEach((course) => {
       if (course.creditHours != null) {
         credits += course.creditHours;
-      } else if (course.creditHourLow != null) {
-        credits += course.creditHourLow;
       } else if (course.creditHourHigh != null) {
         credits += course.creditHourHigh;
+      } else if (course.creditHourLow != null) {
+        credits += course.creditHourLow;
       }
     });
     return credits + " Credits";
@@ -212,15 +220,14 @@ const App = () => {
     { value: 2330, label: "11:30 PM" },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [instructor, setInstructor] = useState("");
   const [attributes, setAttributes] = useState([]);
 
-  const [onlyOpen, setOnlyOpen] = useState(true);
+  const [onlyOpen, setOnlyOpen] = useState(false);
   const [onlyGrad, setOnlyGrad] = useState(false);
   const [onlyGU, setOnlyGU] = useState(true);
   const [noFriday, setNoFriday] = useState(false);
 
-  const [showShortcuts, setShowShortcuts] = useState(true);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -334,8 +341,6 @@ const App = () => {
           }
         }
       }
-
-      if (course.faculty.length === 0 && instructor !== "") return false;
 
       if (
         !course.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -500,6 +505,10 @@ const App = () => {
       <div className="container">
         <div className="content">
           <div className="header">
+            <a target="_blank" href="https://hoyadevelopers.com">
+              <img src="hd-logo.png" alt="logo" />
+            </a>
+
             <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>

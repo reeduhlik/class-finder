@@ -93,6 +93,7 @@ const CalendarCourse = ({ course, func, color }) => {
 
   return (
     <div className="course" onClick={func}>
+      <div className="course-color" style={{ backgroundColor: color }}></div>
       <div className="course-top">
         <div className="course-top-left">
           <h3>
