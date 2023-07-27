@@ -25,33 +25,35 @@ driver.find_element(By.NAME, "j_username").send_keys("***REMOVED***")
 driver.find_element(By.NAME, "j_password").send_keys("***REMOVED***")
 driver.find_element(By.NAME, "_eventId_proceed").click()
 
-WebDriverWait(driver, 600).until(EC.presence_of_element_located((By.ID, 'trust-browser-button')))
+try:
+    WebDriverWait(driver, 600).until(EC.presence_of_element_located((By.ID, 'trust-browser-button')))
+    driver.find_element(By.ID, "trust-browser-button").click()
+    driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/term/termSelection?mode=search")
+    #wait for duo page
 
-driver.find_element(By.ID, "trust-browser-button").click()
-driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/term/termSelection?mode=search")
-#wait for duo page
+    #run script to find the session storage token
+    code = driver.execute_script("return window.sessionStorage.getItem('xe.unique.session.storage.id')")
 
-#run script to find the session storage token
-code = driver.execute_script("return window.sessionStorage.getItem('xe.unique.session.storage.id')")
+    driver.find_element(By.CLASS_NAME, "select2-arrow").click()
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202330')))
+    driver.find_element(By.ID, "202330").click()
+    driver.find_element(By.ID, "term-go").click()
 
-driver.find_element(By.CLASS_NAME, "select2-arrow").click()
-WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202330')))
-driver.find_element(By.ID, "202330").click()
-driver.find_element(By.ID, "term-go").click()
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'search-go')))
+    driver.find_element(By.ID, "search-go").click()
 
-WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'search-go')))
-driver.find_element(By.ID, "search-go").click()
+    ##now we can get the json data by looping through each page
 
-##now we can get the json data by looping through each page
-
-for i in range(0, 12):
-    print(" Fetching page " + str(i))
-    driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202330&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
-    pre = driver.find_element(By.TAG_NAME, "pre").text
-    data = json.loads(pre)
-#store the json data from the url in a file called data.json
-    with open(f'page{i}.json', 'w') as f:
-        json.dump(data, f)
+    for i in range(0, 12):
+        print(" Fetching page " + str(i))
+        driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202330&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
+        pre = driver.find_element(By.TAG_NAME, "pre").text
+        data = json.loads(pre)
+    #store the json data from the url in a file called data.json
+        with open(f'page{i}.json', 'w') as f:
+            json.dump(data, f)
+except:
+    print("Duo timed out.")
 
 
 
