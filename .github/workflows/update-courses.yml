@@ -2,6 +2,8 @@ name: update-courses
 on:
   schedule:
     - cron: "0 */3 * * *"
+permissions:
+  contents: write
 jobs:
   scrape-python:
     runs-on: macos-latest
@@ -13,15 +15,15 @@ jobs:
     - run: pip install -r requirements.txt
     - name: Run a one-line script
       run: python ./src/course_scraper.py
-    - name: switching from HTTPS to SSH
-      run: git remote set-url origin https://github.com/reeduhlik/class-finder.git
+    - name: Committing changed files back to Github
+      run: git config --global user.name 'Reed Uhlik'
+    - name: Config property
+      run: git config --global user.email 'reeduhlik@users.noreply.github.com'
     - name: check for changes
       run: git status
     - name: stage changed files
       run: git add .
     - name: commit changed files
       run: git commit -m "Auto updating courses"
-    - name: fetch from main
-      run: git fetch origin main
     - name: push code to master
-      run: git push origin HEAD:main
+      run: git push
