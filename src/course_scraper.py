@@ -39,8 +39,7 @@ WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202330'))
 driver.find_element(By.ID, "202330").click()
 driver.find_element(By.ID, "term-go").click()
 
-print(code)
-
+WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'search-go')))
 driver.find_element(By.ID, "search-go").click()
 
 ##now we can get the json data by looping through each page
