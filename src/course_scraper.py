@@ -5,12 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from urllib import parse
-import csv
-import requests
 import json
-
-from bs4 import BeautifulSoup
 
 
 options = Options()
@@ -45,7 +40,6 @@ driver.find_element(By.ID, "202330").click()
 driver.find_element(By.ID, "term-go").click()
 
 print(code)
-input("Press Enter to continue...")
 
 driver.find_element(By.ID, "search-go").click()
 
