@@ -14,7 +14,9 @@ jobs:
       with:
         python-version: 3.9
     - run: pip install -r requirements.txt
-    - name: Run a one-line script
+    - name: Checkout main branch
+      run: git checkout main
+    - name: Run a scraping script
       run: python ./src/course_scraper.py
     - name: Committing changed files back to Github
       run: git config --global user.name 'Reed Uhlik'
