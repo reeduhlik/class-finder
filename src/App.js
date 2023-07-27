@@ -75,6 +75,7 @@ const App = () => {
     const initialValue = JSON.parse(saved);
     return initialValue || [];
   });
+  const [hoveredCourse, setHoveredCourse] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
 
@@ -222,7 +223,7 @@ const App = () => {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [attributes, setAttributes] = useState([]);
-  const [filterConflicts, setFilterConflicts] = useState(false);
+  const [filterConflicts, setFilterConflicts] = useState(true);
 
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [onlyGrad, setOnlyGrad] = useState(false);
@@ -632,6 +633,8 @@ const App = () => {
                 course={course}
                 key={course.id}
                 func={() => addCourse(course)}
+                hoverFunc={() => setHoveredCourse(course)}
+                unhoverFunc={() => setHoveredCourse(null)}
               />
             ))}
           </InfiniteScroll>
@@ -662,6 +665,7 @@ const App = () => {
                 <div className="calendar-day">
                   <p>{day}</p>
                   {times.map((time, index) => {
+                    let hover = false;
                     //if any selected courses have a meeting at this time, display it
                     const coursesAtTime = selectedCourses.filter((course) => {
                       if (course.meetingsFaculty.length > 0) {
@@ -676,7 +680,30 @@ const App = () => {
                         );
                       }
                     });
-                    if (coursesAtTime.length === 0) {
+
+                    if (hoveredCourse) {
+                      if (hoveredCourse.meetingsFaculty.length > 0) {
+                        hover =
+                          switchDayOfWeek(hoveredCourse, day) &&
+                          Number(
+                            hoveredCourse.meetingsFaculty[0].meetingTime
+                              .beginTime
+                          ) <= Number(time) &&
+                          Number(
+                            hoveredCourse.meetingsFaculty[0].meetingTime.endTime
+                          ) > Number(time);
+                      }
+                    }
+
+                    if (hover) {
+                      return (
+                        <div
+                          className="calendar-slot slot-filled"
+                          style={{
+                            backgroundColor: "#e1e1e1",
+                          }}></div>
+                      );
+                    } else if (coursesAtTime.length === 0) {
                       return (
                         <div
                           className={

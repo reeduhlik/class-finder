@@ -732,7 +732,7 @@ backdrop-filter: blur(5px);
 
 .calendar-slot:hover .calendar-tooltip{
   cursor: pointer;
-  transition: .3s all;
+  transition: .1s all;
   opacity: 1;
 }
 
@@ -751,7 +751,7 @@ backdrop-filter: blur(5px);
 
   padding: 10px;
   border-radius: 3px;
-  transition: .3s all;
+  transition: .1s all;
 }
 
 .calendar-close:hover {
@@ -801,11 +801,11 @@ backdrop-filter: blur(5px);
 
 .slot-empty{
   background-color: white;
-  transition: .6s all;
+  transition: .3s all;
 }
 .slot-filled{
   background-color: #49A7C5;
-  transition: .6s all;
+  transition: .3s all;
 }
 
 .calendar-day p{

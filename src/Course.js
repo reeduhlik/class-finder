@@ -2,7 +2,7 @@ import React from "react";
 import instructors from "./instructors";
 import "animate.css";
 
-const Course = ({ course, func }) => {
+const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
   const calculateCourseRating = (course) => {
     //find index of course in instructor array based on instructor name
     const instructorIndex = instructors.findIndex(
@@ -109,7 +109,9 @@ const Course = ({ course, func }) => {
   return (
     <div
       className="course animate__animated animate__zoomInUp animate__fast"
-      onClick={func}>
+      onClick={func}
+      onMouseEnter={hoverFunc}
+      onMouseLeave={unhoverFunc}>
       <div className="course-top">
         <div className="course-top-left">
           <h3>
