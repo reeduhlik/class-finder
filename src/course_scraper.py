@@ -50,7 +50,7 @@ try:
         pre = driver.find_element(By.TAG_NAME, "pre").text
         data = json.loads(pre)
     #store the json data from the url in a file called data.json
-        with open(f'page{i}.json', 'w') as f:
+        with open(f'src/page{i}.json', 'w') as f:
             json.dump(data, f)
 except:
     print("Duo timed out.")
