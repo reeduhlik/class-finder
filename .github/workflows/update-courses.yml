@@ -1,5 +1,7 @@
 name: update-courses
-on: [push]
+on:
+  schedule:
+    - cron: "0 */3 * * *"
 jobs:
   scrape-python:
     runs-on: macos-latest
@@ -19,7 +21,7 @@ jobs:
       run: git add .
     - name: commit changed files
       run: git commit -m "Auto updating courses"
-    - name: fetch from master
-      run: git fetch origin master
+    - name: fetch from main
+      run: git fetch origin main
     - name: push code to master
-      run: git push origin HEAD:master
+      run: git push origin HEAD:main
