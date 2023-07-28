@@ -19,7 +19,11 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
   };
   const getTimeString = () => {
     let str = "";
+    let empty = false;
     for (let i = 0; i < course.meetingsFaculty.length; i++) {
+      if (course.meetingsFaculty[i].meetingTime.beginTime == "") {
+        empty = true;
+      }
       str +=
         formatTimeFromMilitary(
           course.meetingsFaculty[i].meetingTime.beginTime
@@ -30,7 +34,7 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
         str += ", ";
       }
     }
-    if (str.length == 0) {
+    if (str.length == 0 || str == " - " || empty) {
       str = "TBA";
     }
     return str;
@@ -108,7 +112,7 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
 
   return (
     <div
-      className="course animate__animated animate__zoomInUp animate__fast"
+      className="course animate__animated animate__fadeIn animate__faster"
       onClick={func}
       onMouseEnter={hoverFunc}
       onMouseLeave={unhoverFunc}>
@@ -146,7 +150,7 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
               "https://www.ratemyprofessors.com/search/professors/355?q=" +
               encodeURIComponent(course.faculty[0]?.displayName)
             }>
-            {course.faculty.length > 0 && rating}
+            {course.faculty.length > 0 ? rating : "N/A"}
 
             {rating !== "N/A" && rating >= 4 && (
               <div className="color-circle-green"></div>
@@ -179,9 +183,11 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
           <img src="/icons/location.svg" alt="location" />
           <p>
             {course.meetingsFaculty.length > 0 &&
-              course.meetingsFaculty[0].meetingTime.building +
+            course.meetingsFaculty[0].meetingTime.building
+              ? course.meetingsFaculty[0].meetingTime.building +
                 "-" +
-                course.meetingsFaculty[0].meetingTime.room}
+                course.meetingsFaculty[0].meetingTime.room
+              : "TBA"}
           </p>
         </div>
 

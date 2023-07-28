@@ -19,6 +19,7 @@ import page11 from "./page11.json";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 import { inject } from "@vercel/analytics";
+import AnimatedNumbers from "react-animated-numbers";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
@@ -33,6 +34,7 @@ import {
 import Toggle from "react-toggle";
 import Select from "react-select";
 import IntroScreen from "./IntroScreen";
+import useEventListener from "@use-it/event-listener";
 
 const mergePages = () => {
   const data = page0.data.concat(
@@ -275,10 +277,13 @@ const App = () => {
     });
   }, []);
 
-  document.addEventListener("keydown", (e) => {
-    console.log(e.key);
+  const handleKeyDown = (e) => {
     if (e.key === "/") {
-      setShowCalendar(!showCalendar);
+      if (showCalendar) {
+        setShowCalendar(false);
+      } else {
+        setShowCalendar(true);
+      }
     } else if (e.key === ".") {
       setShowIntro(!showIntro);
     } else if (e.key === "[") {
@@ -290,8 +295,7 @@ const App = () => {
     } else if (e.key === "Escape") {
       setShowShortcuts(false);
     }
-  });
-
+  };
   const calculateCourseRating = (course) => {
     //find index of course in instructor array based on instructor name
 
@@ -318,7 +322,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log(startTime);
     const newFilteredCourses = courses.filter((course) => {
       //business logic in here
       if (onlyOpen && course.seatsAvailable === 0) return false;
@@ -384,8 +387,6 @@ const App = () => {
         Number(course.meetingsFaculty[0]?.meetingTime.beginTime) <
           startTime.value
       ) {
-        console.log("start time");
-        console.log(course.meetingsFaculty[0]?.meetingTime.beginTime);
         return false;
       }
 
@@ -399,19 +400,16 @@ const App = () => {
       }
 
       if (attributes.length > 0) {
+        let hasAttribute = false;
         for (let i = 0; i < attributes.length; i++) {
-          console.log(attributes[i]);
-          let found = false;
           for (let j = 0; j < course.sectionAttributes.length; j++) {
             if (attributes[i].value === course.sectionAttributes[j].code) {
-              found = true;
+              hasAttribute = true;
               break;
             }
           }
-          if (!found) {
-            return false;
-          }
         }
+        if (!hasAttribute) return false;
       }
 
       if (
@@ -447,6 +445,8 @@ const App = () => {
     filterConflicts,
     selectedCourses,
   ]);
+
+  useEventListener("keydown", handleKeyDown);
 
   const expandOptions = () => {
     setOpenModal(!openModal);
@@ -561,12 +561,14 @@ const App = () => {
               name="start-time"
               options={timeOptions}
               defaultValue={{ label: startTime.label }}
+              className="time-select"
               onChange={(e) => setStartTime(e)}
             />
             <p>Ending no later than...</p>
             <Select
-              name="start-time"
+              name="end-time"
               defaultValue={{ label: endTime.label }}
+              className="time-select"
               options={timeOptions}
               onChange={(e) => setEndTime(e)}
             />
@@ -575,6 +577,7 @@ const App = () => {
               isMulti
               name="attributes"
               defaultValue={attributes}
+              className="time-select"
               options={attributeOptions}
               onChange={(e) => setAttributes(e)}
               placeholder="Filter by Attribute"
@@ -617,6 +620,7 @@ const App = () => {
           <h2 className="main-subtitle">
             {filteredCourses.length} courses found!
           </h2>
+
           <InfiniteScroll
             dataLength={records}
             className="courses"

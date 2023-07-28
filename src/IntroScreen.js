@@ -65,7 +65,10 @@ const IntroScreen = (props) => {
             <img src="/icons/calendar.svg" alt="search" />
             <div className="introscreen-feature-text">
               <h4>Calendar View</h4>
-              <p>Visualize your schedule with a calendar view. Coming soon.</p>
+              <p>
+                Visualize your schedule with a calendar view. Filter classes to
+                hide any scheduling classes.
+              </p>
             </div>
           </div>
         </div>
