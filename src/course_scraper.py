@@ -26,7 +26,7 @@ driver.find_element(By.NAME, "j_password").send_keys("***REMOVED***")
 driver.find_element(By.NAME, "_eventId_proceed").click()
 
 try:
-    WebDriverWait(driver, 600).until(EC.presence_of_element_located((By.ID, 'trust-browser-button')))
+    WebDriverWait(driver, 300).until(EC.presence_of_element_located((By.ID, 'trust-browser-button')))
     driver.find_element(By.ID, "trust-browser-button").click()
     driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/term/termSelection?mode=search")
     #wait for duo page
