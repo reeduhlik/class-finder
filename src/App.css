@@ -69,15 +69,19 @@ body{
 }
 .keyboard-outline{
   margin: 0;
-  width: 30px;
   height: 30px;
+  padding-left: 10px;
+  padding-right: 10px;
   text-align: center;
   line-height: 30px;
-  border-radius: 2px; 
-  border: 2px solid #333;
+  border-radius: 4px; 
+  min-width: 10px;
   color: #333;
+  border: 2px solid #333;
+  background: #fafafa;
   margin-right: 10px;
-  font-size: 18px;
+
+  font-size: 16px;
 }
 
 .courses{
@@ -125,7 +129,7 @@ body{
 }
 
 .right{
-  width: 25%;
+  width: 35%;
   min-width: 400px;
   position: -webkit-sticky;
   position: sticky;
@@ -545,22 +549,71 @@ text-align: center;
 
 
 .options {
-  width: 400px;
+  width: fit-content;
   margin: 0 auto;
-  position: absolute;
-  top: 20px;
-  left: calc(50% - 230px);
+  margin-top: 50px;
   background-color: white;
   border-radius: 10px;
-  padding: 30px;
+  padding: 70px 100px;
+
   box-shadow: 0px 0px 155px 5px rgba(0,0,0,0.25);
+
+}
+
+.app-settings-subtitle {
+  margin-top: -20px;
+  font-size: 18px;
+}
+
+.options h5{
+  font-size: 16px;
+  margin: 0;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+.options-content {
+  display: flex;
+  justify-content: space-around;
+align-items: start;
+}
+.option-button{
+  display: none;
+}
+.options-content-left {
+  width: fit-content;
+  margin-right: 100px;
+}
+
+.options-content-middle {
+  margin-left: 20px;
+  margin-right: 20px;
+  width: 40%;
+}
+
+.options-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.options h2{
+  margin-bottom: 0px;
+  margin-right: 25px;
+  margin-top: 0px;
+  font-size: 30px;
+}
+.options-header p{
+  margin-right: 10px;
 }
 .options h3{
-  text-align: center;
+
 }
 .option {
   display: flex;
   align-items: center;
+  
 
 }
 .option p{
@@ -816,8 +869,18 @@ backdrop-filter: blur(5px);
 }
 .time-select{
   height: 50px;
+  width: 100%;
 }
 
+.time-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-gap: 10px;
+  margin-top: 15px;
+}
+.time-options h5{
+  margin: 0;
+}
 .courses-found {
   display: flex;
   justify-content: center;
@@ -825,6 +888,9 @@ backdrop-filter: blur(5px);
   margin-bottom: 20px;
 }
 
+.mobile-calendar {
+  display: none;
+}
 @media screen and (max-width: 1500px) {
   .courses{
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -835,10 +901,33 @@ backdrop-filter: blur(5px);
   .icons{
     display: none;
   }
-.right{
-  display: none;
-}
 
+  .right {
+    position: fixed;
+    width: 85%;
+    border-radius: 20px;
+    top: 20vh;
+    height: 80vh;
+  }
+  .mobile-calendar {
+    position: absolute;
+    z-index: 15;
+    top: 30px;
+    right: -5px;
+    display: flex;
+    align-items: center;
+    background: navy;
+    padding: 0px 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 18px;
+
+  }
+  .mobile-calendar p {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 16px;
+  }
   .introscreen{
     padding: 30px;
   }
@@ -899,6 +988,40 @@ backdrop-filter: blur(5px);
   }
   .introscreen-feature {
     padding: 10px;
+  }
+  .keyboard-outline {
+    display: none;
+  }
+  .options-header p {
+    display: none;
+  }
+  .options-content {
+    width: 100%;
+  }
+  .options-content-right {
+    display: none;
+
+  }
+  .options-content-left {
+    width: 100%;
+    margin-right: 0;
+  }
+  .options {
+    padding: 50px 50px;
+  }
+  .option-button{
+    display: block;
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 100%;
+    color: navy;
+    background: white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-weight: bold;
+    font-size: 18px;
+    border: 2px solid navy;
+    border-radius: 3px;
   }
 
 }

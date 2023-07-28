@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import instructors from "./instructors";
 import Course from "./Course";
 import CalendarCourse from "./CalendarCourse";
@@ -69,6 +69,8 @@ const App = () => {
     return formattedHour + ":" + minute + " " + ampm;
   };
   const courses = mergePages();
+  const inputRef = useRef(null);
+  const attributesRef = useRef(null);
 
   const [showIntro, setShowIntro] = useState(true);
   const [showCalendar, setShowCalendar] = useState(true);
@@ -77,6 +79,7 @@ const App = () => {
     const initialValue = JSON.parse(saved);
     return initialValue || [];
   });
+
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
@@ -277,23 +280,93 @@ const App = () => {
     });
   }, []);
 
-  const handleKeyDown = (e) => {
+  const resetOptions = () => {
+    setAttributes([]);
+    setOnlyOpen(false);
+    setOnlyGrad(false);
+    setOnlyGU(false);
+    setNoFriday(false);
+    setFilterConflicts(false);
+    setStartTime(timeOptions[0]);
+    setEndTime(timeOptions[timeOptions.length - 1]);
+  };
+
+  const handleKeyDown = async (e) => {
+    //if either inputs are focused, don't do anything
+    console.log(document.activeElement.tagName);
+
+    //if the active element is any of the inputs, don't do anything
+    if (document.activeElement.tagName === "INPUT") {
+      return;
+    }
+
     if (e.key === "/") {
-      if (showCalendar) {
-        setShowCalendar(false);
-      } else {
-        setShowCalendar(true);
-      }
-    } else if (e.key === ".") {
+      setOpenModal(false);
+      setShowShortcuts(false);
+      setShowIntro(false);
+      e.preventDefault();
+      inputRef.current.focus();
+    } else if (e.key === "?") {
       setShowIntro(!showIntro);
-    } else if (e.key === "[") {
-      setShowShortcuts(!showShortcuts);
-    } else if (e.key === "]") {
+    } else if (e.key === " ") {
+      e.preventDefault();
       setOpenModal(!openModal);
+    } else if (e.key === "Enter") {
+      if (openModal) {
+        setOpenModal(false);
+      } else {
+        setShowCalendar(!showCalendar);
+      }
     } else if (e.key === ";") {
       onCopyClick();
     } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpenModal(false);
       setShowShortcuts(false);
+      setShowIntro(false);
+      inputRef.current.blur();
+    } else if (e.key === "a") {
+      e.preventDefault();
+      await setOpenModal(true);
+      attributesRef.current.focus();
+    } else if (e.key === "r") {
+      setOnlyOpen(!onlyOpen);
+    } else if (e.key === "q") {
+      setOnlyGU(!onlyGU);
+    } else if (e.key === "u") {
+      setOnlyGrad(!onlyGrad);
+    } else if (e.key === "f") {
+      setNoFriday(!noFriday);
+    } else if (e.key === "c") {
+      setFilterConflicts(!filterConflicts);
+    } else if (e.key === "-") {
+      const i = timeOptions.findIndex((time) => time.value === startTime.value);
+
+      if (i !== 0) {
+        setStartTime(timeOptions[i - 1]);
+      }
+    } else if (e.key === "=") {
+      const i = timeOptions.findIndex((time) => time.value === startTime.value);
+
+      if (i !== timeOptions.length - 1) {
+        setStartTime(timeOptions[i + 1]);
+      }
+    } else if (e.key === "[") {
+      const i = timeOptions.findIndex((time) => time.value === endTime.value);
+
+      if (i !== 0) {
+        setEndTime(timeOptions[i - 1]);
+      }
+    } else if (e.key === "]") {
+      const i = timeOptions.findIndex((time) => time.value === endTime.value);
+
+      if (i !== timeOptions.length - 1) {
+        setEndTime(timeOptions[i + 1]);
+      }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      //reset all filters
+      resetOptions();
     }
   };
   const calculateCourseRating = (course) => {
@@ -454,135 +527,158 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className="icons">
-        {!showShortcuts && (
-          <FaBars
-            className="icon-bar"
-            onClick={() => setShowShortcuts(!showShortcuts)}
-          />
-        )}
-        {showShortcuts && (
-          <div
-            className="icon-row"
-            onClick={() => setShowShortcuts(!showShortcuts)}>
-            <h6 className="keyboard-outline">[</h6>
-            <h4>
-              <FaArrowRightToBracket />
-            </h4>
-            <p>Toggle Menu</p>
-          </div>
-        )}
-        {showShortcuts && (
-          <div className="icon-row" onClick={() => setOpenModal(true)}>
-            <h6 className="keyboard-outline">]</h6>
-            <h4>
-              <FaSliders />
-            </h4>
-            <p>Open Settings</p>
-          </div>
-        )}
-        {showShortcuts && (
-          <div
-            className="icon-row"
-            onClick={() => setShowCalendar(!showCalendar)}>
-            <h6 className="keyboard-outline">/</h6>
-            <h4>
-              <FaRegCalendar />
-            </h4>
-            <p>Toggle Calendar</p>
-          </div>
-        )}
-        {showShortcuts && (
-          <div className="icon-row" onClick={() => setShowIntro(!showIntro)}>
-            <h6 className="keyboard-outline">.</h6>
-            <h4>
-              <FaArrowRightToBracket />
-            </h4>
-            <p>Toggle Intro Screen</p>
-          </div>
-        )}
-        {showShortcuts && (
-          <div className="icon-row" onClick={onCopyClick}>
-            <h6 className="keyboard-outline">;</h6>
-            <h4>
-              <FaCopy />
-            </h4>
-            <p>Copy Your CRNs</p>
-          </div>
-        )}
-      </div>
+      <button
+        onClick={() => setShowCalendar(!showCalendar)}
+        className="mobile-calendar">
+        <FaRegCalendar />
+        <p>{showCalendar ? "Hide" : "Show"}</p>
+      </button>
       {showIntro && <IntroScreen closeModal={() => setShowIntro(false)} />}
       {openModal && (
         <div className="introscreen-bg">
-          <div className="options animate__animated animate__zoomInUp animate__fast">
-            <h3>Customize your filters</h3>
-            <div className="option">
-              <p>Show only classes with seats available</p>
-              <Toggle
-                defaultChecked={onlyOpen}
-                className="toggle"
-                onChange={() => setOnlyOpen(!onlyOpen)}
-              />
+          <div className="options animate__animated animate__fadeIn animate__faster">
+            <div className="options-header">
+              <h2>App Settings</h2>
+              <h6 className="keyboard-outline">ESC</h6>
+              <p>or</p>
+              <h6 className="keyboard-outline">Space</h6>
             </div>
-            <div className="option">
-              <p>Show only undergraduate classes</p>
-              <Toggle
-                defaultChecked={onlyGrad}
-                className="toggle"
-                onChange={() => setOnlyGrad(!onlyGrad)}
-              />
+            <p className="app-settings-subtitle">
+              Thoughtfully designed to make your experience perfect.
+            </p>
+
+            <div className="options-content">
+              <div className="options-content-left">
+                <h3>Your Search Settings</h3>
+                <div className="option">
+                  <h6 className="keyboard-outline">R</h6>
+                  <p>Show only classes with seats available</p>
+                  <Toggle
+                    checked={onlyOpen}
+                    className="toggle"
+                    onChange={() => setOnlyOpen(!onlyOpen)}
+                  />
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">U</h6>
+                  <p>Show only undergraduate classes</p>
+                  <Toggle
+                    checked={onlyGrad}
+                    className="toggle"
+                    onChange={() => setOnlyGrad(!onlyGrad)}
+                  />
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">C</h6>
+                  <p>Hide classes with schedule conflict</p>
+                  <Toggle
+                    checked={filterConflicts}
+                    className="toggle"
+                    onChange={() => setFilterConflicts(!filterConflicts)}
+                  />
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">Q</h6>
+                  <p>Hide Qatar classes</p>
+                  <Toggle
+                    checked={onlyGU}
+                    className="toggle"
+                    onChange={() => setOnlyGU(!onlyGU)}
+                  />
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">F</h6>
+                  <p>Hide Friday classes</p>
+                  <Toggle
+                    checked={noFriday}
+                    className="toggle"
+                    onChange={() => setNoFriday(!noFriday)}
+                  />
+                </div>
+
+                <h5>Filter by attribute</h5>
+                <div className="option">
+                  <Select
+                    isMulti
+                    name="attributes"
+                    defaultValue={attributes}
+                    className="time-select"
+                    options={attributeOptions}
+                    onChange={(e) => setAttributes(e)}
+                    placeholder="Filter by Attribute"
+                    ref={attributesRef}
+                  />
+                </div>
+                <div className="time-options">
+                  <h5>Class starts after...</h5>
+                  <h5>Class ends before...</h5>
+                  <div className="option">
+                    <Select
+                      name="start-time"
+                      options={timeOptions}
+                      value={{ label: startTime.label }}
+                      className="time-select"
+                      onChange={(e) => setStartTime(e)}
+                    />
+                  </div>
+
+                  <div className="option">
+                    <Select
+                      name="end-time"
+                      value={{ label: endTime.label }}
+                      className="time-select"
+                      options={timeOptions}
+                      onChange={(e) => setEndTime(e)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="options-content-right">
+                <h3>All Keyboard Shortcuts</h3>
+
+                <div className="option">
+                  <h6 className="keyboard-outline">Space</h6>
+                  <p>Open Menu</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">Enter</h6>
+                  <p>Toggle Calendar</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">Tab</h6>
+                  <p>Reset all filters</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">/</h6>
+                  <p>Search for class</p>
+                </div>
+
+                <div className="option">
+                  <h6 className="keyboard-outline">Escape</h6>
+                  <p>Unfocus search</p>
+                </div>
+
+                <div className="option">
+                  <h6 className="keyboard-outline">A</h6>
+                  <p>Add attribute filter</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">?</h6>
+                  <p>Toggle Intro Screen</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">-</h6>
+                  <h6 className="keyboard-outline">=</h6>
+                  <p>Change start time filter</p>
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">[</h6>
+                  <h6 className="keyboard-outline">]</h6>
+                  <p>Change end time filter</p>
+                </div>
+              </div>
             </div>
-            <div className="option">
-              <p>Hide classes with schedule conflict</p>
-              <Toggle
-                defaultChecked={filterConflicts}
-                className="toggle"
-                onChange={() => setFilterConflicts(!filterConflicts)}
-              />
-            </div>
-            <div className="option">
-              <p>Hide Qatar classes</p>
-              <Toggle
-                defaultChecked={onlyGU}
-                className="toggle"
-                onChange={() => setOnlyGU(!onlyGU)}
-              />
-            </div>
-            <div className="option">
-              <p>Hide Friday classes</p>
-              <Toggle
-                defaultChecked={noFriday}
-                className="toggle"
-                onChange={() => setNoFriday(!noFriday)}
-              />
-            </div>
-            <p>Starting no earlier than...</p>
-            <Select
-              name="start-time"
-              options={timeOptions}
-              defaultValue={{ label: startTime.label }}
-              className="time-select"
-              onChange={(e) => setStartTime(e)}
-            />
-            <p>Ending no later than...</p>
-            <Select
-              name="end-time"
-              defaultValue={{ label: endTime.label }}
-              className="time-select"
-              options={timeOptions}
-              onChange={(e) => setEndTime(e)}
-            />
-            <p>Filter by attribute</p>
-            <Select
-              isMulti
-              name="attributes"
-              defaultValue={attributes}
-              className="time-select"
-              options={attributeOptions}
-              onChange={(e) => setAttributes(e)}
-              placeholder="Filter by Attribute"
-            />
-            <button className="toggle_modal" onClick={expandOptions}>
+            <button className="option-button" onClick={expandOptions}>
               Close
             </button>
           </div>
@@ -607,7 +703,11 @@ const App = () => {
                 type="text"
                 className="main-input extra-padding"
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  e.key === "Escape" && inputRef.current.blur();
+                }}
                 placeholder="Search by Course Title, Instructor, or Code"
+                ref={inputRef}
               />
               <FaMagnifyingGlass className="input-logo" />
             </div>
@@ -644,7 +744,7 @@ const App = () => {
           </InfiniteScroll>
         </div>
         {showCalendar && (
-          <div className="right animate__animated animate__slideInRight">
+          <div className="right animate__animated animate__slideInRight animate__faster">
             <h4
               className="calendar-close"
               onClick={() => setShowCalendar(false)}></h4>
