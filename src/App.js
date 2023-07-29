@@ -20,17 +20,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 import { inject } from "@vercel/analytics";
 import AnimatedNumbers from "react-animated-numbers";
+import { PropagateLoader } from "react-spinners";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
-import {
-  FaSliders,
-  FaArrowRightToBracket,
-  FaRegCalendar,
-  FaCopy,
-  FaBars,
-  FaMagnifyingGlass,
-} from "react-icons/fa6";
+import { FaSliders, FaRegCalendar, FaMagnifyingGlass } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
 import IntroScreen from "./IntroScreen";
@@ -235,12 +229,12 @@ const App = () => {
   const [onlyGU, setOnlyGU] = useState(true);
   const [noFriday, setNoFriday] = useState(false);
 
-  const [showShortcuts, setShowShortcuts] = useState(false);
-
   const [openModal, setOpenModal] = useState(false);
+  const [filterByRating, setFilterByRating] = useState(false);
 
   const [records, setrecords] = useState(12);
   const [hasMore, setHasMore] = useState(true);
+  const [loadingAnimation, setLoadingAnimation] = useState(false);
 
   const [startTime, setStartTime] = useState(timeOptions[0]);
   const [endTime, setEndTime] = useState(timeOptions[timeOptions.length - 1]);
@@ -278,6 +272,12 @@ const App = () => {
         }
       });
     });
+    //add a professors RMP rating to the course
+    courses.forEach((course) => {
+      course.rating = calculateCourseRating(course);
+    });
+
+    console.log(courses[0]);
   }, []);
 
   const resetOptions = () => {
@@ -302,7 +302,6 @@ const App = () => {
 
     if (e.key === "/") {
       setOpenModal(false);
-      setShowShortcuts(false);
       setShowIntro(false);
       e.preventDefault();
       inputRef.current.focus();
@@ -322,7 +321,6 @@ const App = () => {
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpenModal(false);
-      setShowShortcuts(false);
       setShowIntro(false);
       inputRef.current.blur();
     } else if (e.key === "a") {
@@ -331,6 +329,8 @@ const App = () => {
       attributesRef.current.focus();
     } else if (e.key === "r") {
       setOnlyOpen(!onlyOpen);
+    } else if (e.key === "`") {
+      setFilterByRating(!filterByRating);
     } else if (e.key === "q") {
       setOnlyGU(!onlyGU);
     } else if (e.key === "u") {
@@ -372,19 +372,14 @@ const App = () => {
   const calculateCourseRating = (course) => {
     //find index of course in instructor array based on instructor name
 
-    let rating = 0;
-
     const instructorIndex = instructors.findIndex(
       (inst) => inst.instructor === course.faculty[0]?.displayName
     );
 
     if (instructorIndex !== -1) {
-      if (instructors[instructorIndex].rating !== 0) {
-        rating += 8 * instructors[instructorIndex].rating;
-      } else {
-        rating += 15;
-      }
-      rating += (6 - instructors[instructorIndex].difficulty) * 8;
+      return instructors[instructorIndex].rating;
+    } else {
+      return 0;
     }
   };
 
@@ -490,6 +485,9 @@ const App = () => {
         !course.subjectCourse
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) &&
+        !course.subjectCourse
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase().replace(/\s+/g, "")) &&
         !course.courseReferenceNumber
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) &&
@@ -502,6 +500,12 @@ const App = () => {
 
       return true;
     });
+
+    if (filterByRating) {
+      newFilteredCourses.sort((a, b) => {
+        return b.rating - a.rating;
+      });
+    }
 
     setFilteredCourses(newFilteredCourses);
     setHasMore(newFilteredCourses.length > records);
@@ -517,6 +521,7 @@ const App = () => {
     endTime,
     filterConflicts,
     selectedCourses,
+    filterByRating,
   ]);
 
   useEventListener("keydown", handleKeyDown);
@@ -595,7 +600,15 @@ const App = () => {
                     onChange={() => setNoFriday(!noFriday)}
                   />
                 </div>
-
+                <div className="option">
+                  <h6 className="keyboard-outline">`</h6>
+                  <p>Sort by RMP Rating</p>
+                  <Toggle
+                    checked={filterByRating}
+                    className="toggle"
+                    onChange={() => setFilterByRating(!filterByRating)}
+                  />
+                </div>
                 <h5>Filter by attribute</h5>
                 <div className="option">
                   <Select
