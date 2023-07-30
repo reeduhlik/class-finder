@@ -5,10 +5,10 @@ const IntroScreen = (props) => {
   return (
     <div className="introscreen-bg">
       <div className="introscreen animate__animated animate__zoomIn">
-        <h2>Introducing Georgetown Course Finder!</h2>
+        <h2>Introducing Hoya Courses!</h2>
         <h5>
-          The newest way to find the perfect classes for you. Built by Reed
-          Uhlik.
+          The easiest way to build your perfect schedule and find classes you
+          need. Built by Reed Uhlik.
         </h5>
         <div className="introscreen-features">
           <div className="introscreen-feature animate__animated animate__zoomInUp animate__delay-1s">
@@ -45,9 +45,8 @@ const IntroScreen = (props) => {
             <div className="introscreen-feature-text">
               <h4>Powerful Search</h4>
               <p>
-                Search that just makes sense. No more struggling to find the
-                right course for you. Built with useful filters and a powerful
-                search engine.
+                Search that just makes sense. Built with useful filters and a
+                powerful search engine.
               </p>
             </div>
           </div>
@@ -57,7 +56,7 @@ const IntroScreen = (props) => {
               <h4>Professor & RMP Links</h4>
               <p>
                 Click on any professor name or RMP rating to be taken to their
-                webpage.
+                webpage. Sort by RMP rating to see the best professors.
               </p>
             </div>
           </div>
@@ -67,7 +66,7 @@ const IntroScreen = (props) => {
               <h4>Calendar View</h4>
               <p>
                 Visualize your schedule with a calendar view. Filter classes to
-                hide any scheduling classes.
+                hide any scheduling conflicts with your other classes.
               </p>
             </div>
           </div>

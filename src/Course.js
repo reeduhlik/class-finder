@@ -2,7 +2,14 @@ import React from "react";
 import instructors from "./instructors";
 import "animate.css";
 
-const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
+const Course = ({
+  course,
+  func,
+  hoverFunc,
+  unhoverFunc,
+  showAttributes,
+  showInfo,
+}) => {
   const calculateCourseRating = (course) => {
     //find index of course in instructor array based on instructor name
     const instructorIndex = instructors.findIndex(
@@ -126,80 +133,82 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
       </div>
       <h2>{formatTitle(course.courseTitle)}</h2>
       <h6>{getCreditHours()}</h6>
-      <div className="course-icons">
-        <div className="course-icon">
-          <img src="/icons/instructor.svg" alt="instructor" />
+      {showInfo && (
+        <div className="course-icons">
+          <div className="course-icon">
+            <img src="/icons/instructor.svg" alt="instructor" />
 
-          <a
-            target="_blank"
-            href={
-              "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
-              encodeURIComponent(course.faculty[0]?.displayName)
-            }>
-            {course.faculty.length > 0
-              ? course.faculty[0].displayName
-              : "Not Available"}
-          </a>
-        </div>
+            <a
+              target="_blank"
+              href={
+                "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
+                encodeURIComponent(course.faculty[0]?.displayName)
+              }>
+              {course.faculty.length > 0
+                ? course.faculty[0].displayName
+                : "Not Available"}
+            </a>
+          </div>
 
-        <div className="course-icon">
-          <img src="/icons/star.svg" alt="rating" />
-          <a
-            target="_blank"
-            href={
-              "https://www.ratemyprofessors.com/search/professors/355?q=" +
-              encodeURIComponent(course.faculty[0]?.displayName)
-            }>
-            {course.faculty.length > 0 ? rating : "N/A"}
+          <div className="course-icon">
+            <img src="/icons/star.svg" alt="rating" />
+            <a
+              target="_blank"
+              href={
+                "https://www.ratemyprofessors.com/search/professors/355?q=" +
+                encodeURIComponent(course.faculty[0]?.displayName)
+              }>
+              {course.faculty.length > 0 ? rating : "N/A"}
 
-            {rating !== "N/A" && rating >= 4 && (
-              <div className="color-circle-green"></div>
-            )}
-            {rating !== "N/A" && rating < 4 && rating >= 3 && (
-              <div className="color-circle-yellow"></div>
-            )}
-            {rating !== "N/A" && rating < 3 && (
-              <div className="color-circle-red"></div>
-            )}
-          </a>
-        </div>
-        <div className="course-icon">
-          <img src="/icons/seats.svg" alt="Seats" />
+              {rating !== "N/A" && rating >= 4 && (
+                <div className="color-circle-green"></div>
+              )}
+              {rating !== "N/A" && rating < 4 && rating >= 3 && (
+                <div className="color-circle-yellow"></div>
+              )}
+              {rating !== "N/A" && rating < 3 && (
+                <div className="color-circle-red"></div>
+              )}
+            </a>
+          </div>
+          <div className="course-icon">
+            <img src="/icons/seats.svg" alt="Seats" />
 
-          <p>
-            <span className="large-text">{course.seatsAvailable}</span>
-            <span className="small-text">
-              {"/" + course.maximumEnrollment}{" "}
-            </span>
-            Left
-          </p>
-          <p>
-            <span className="large-text">{course.waitAvailable}</span>
-            <span className="small-text">{"/" + course.waitCapacity} </span>
-            WL
-          </p>
-        </div>
-        <div className="course-icon">
-          <img src="/icons/location.svg" alt="location" />
-          <p>
-            {course.meetingsFaculty.length > 0 &&
-            course.meetingsFaculty[0].meetingTime.building
-              ? course.meetingsFaculty[0].meetingTime.building +
-                "-" +
-                course.meetingsFaculty[0].meetingTime.room
-              : "TBA"}
-          </p>
-        </div>
+            <p>
+              <span className="large-text">{course.seatsAvailable}</span>
+              <span className="small-text">
+                {"/" + course.maximumEnrollment}{" "}
+              </span>
+              Left
+            </p>
+            <p>
+              <span className="large-text">{course.waitAvailable}</span>
+              <span className="small-text">{"/" + course.waitCapacity} </span>
+              WL
+            </p>
+          </div>
+          <div className="course-icon">
+            <img src="/icons/location.svg" alt="location" />
+            <p>
+              {course.meetingsFaculty.length > 0 &&
+              course.meetingsFaculty[0].meetingTime.building
+                ? course.meetingsFaculty[0].meetingTime.building +
+                  "-" +
+                  course.meetingsFaculty[0].meetingTime.room
+                : "TBA"}
+            </p>
+          </div>
 
-        <div className="course-icon">
-          <img src="/icons/time.svg" alt="time" />
-          <p>{getTimeString()}</p>
+          <div className="course-icon">
+            <img src="/icons/time.svg" alt="time" />
+            <p>{getTimeString()}</p>
+          </div>
+          <div className="course-icon">
+            <img src="/icons/days.svg" alt="Days" />
+            <p>{formatDaysString()}</p>
+          </div>
         </div>
-        <div className="course-icon">
-          <img src="/icons/days.svg" alt="Days" />
-          <p>{formatDaysString()}</p>
-        </div>
-      </div>
+      )}
       {course.seatsAvailable == 1 && course.waitCount > 0 && (
         <div className="course-alert">
           <img src="/icons/alert.svg" alt="alert" />
@@ -212,14 +221,16 @@ const Course = ({ course, func, hoverFunc, unhoverFunc }) => {
           <p>Course is full :(</p>
         </div>
       )}
-      <div className="course-attributes">
-        {course.sectionAttributes.length > 0 &&
-          course.sectionAttributes.map((attribute) => {
-            if (attribute.code != "MEAN") {
-              return <p className="course-attribute">{attribute.code}</p>;
-            }
-          })}
-      </div>
+      {showAttributes && (
+        <div className="course-attributes">
+          {course.sectionAttributes.length > 0 &&
+            course.sectionAttributes.map((attribute) => {
+              if (attribute.code != "MEAN") {
+                return <p className="course-attribute">{attribute.code}</p>;
+              }
+            })}
+        </div>
+      )}
     </div>
   );
 };

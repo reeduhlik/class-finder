@@ -19,8 +19,6 @@ import page11 from "./page11.json";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 import { inject } from "@vercel/analytics";
-import AnimatedNumbers from "react-animated-numbers";
-import { PropagateLoader } from "react-spinners";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
@@ -77,6 +75,8 @@ const App = () => {
   const [hoveredCourse, setHoveredCourse] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
+  const [showCourseAttributes, setShowCourseAttributes] = useState(true);
+  const [showCourseInfo, setShowCourseInfo] = useState(true);
 
   const times = [
     "600",
@@ -275,6 +275,7 @@ const App = () => {
     //add a professors RMP rating to the course
     courses.forEach((course) => {
       course.rating = calculateCourseRating(course);
+      course.courseTitle = course.courseTitle.replace(/&amp;/g, "&");
     });
 
     console.log(courses[0]);
@@ -337,6 +338,10 @@ const App = () => {
       setOnlyGrad(!onlyGrad);
     } else if (e.key === "f") {
       setNoFriday(!noFriday);
+    } else if (e.key === "i") {
+      setShowCourseInfo(!showCourseInfo);
+    } else if (e.key === "p") {
+      setShowCourseAttributes(!showCourseAttributes);
     } else if (e.key === "c") {
       setFilterConflicts(!filterConflicts);
     } else if (e.key === "-") {
@@ -531,7 +536,7 @@ const App = () => {
   };
 
   return (
-    <div className="App">
+    <div className="app dark">
       <button
         onClick={() => setShowCalendar(!showCalendar)}
         className="mobile-calendar">
@@ -609,6 +614,27 @@ const App = () => {
                     onChange={() => setFilterByRating(!filterByRating)}
                   />
                 </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">I</h6>
+                  <p>Show Course Info</p>
+                  <Toggle
+                    checked={showCourseInfo}
+                    className="toggle"
+                    onChange={() => setShowCourseInfo(!showCourseInfo)}
+                  />
+                </div>
+                <div className="option">
+                  <h6 className="keyboard-outline">P</h6>
+                  <p>Show Course Attributes</p>
+                  <Toggle
+                    checked={showCourseAttributes}
+                    className="toggle"
+                    onChange={() =>
+                      setShowCourseAttributes(!showCourseAttributes)
+                    }
+                  />
+                </div>
+
                 <h5>Filter by attribute</h5>
                 <div className="option">
                   <Select
@@ -704,7 +730,7 @@ const App = () => {
               <img src="hd-logo.png" alt="logo" />
             </a>
 
-            <h1 onClick={() => setShowIntro(true)}>Georgetown Course Finder</h1>
+            <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
             The best way to find classes you need. Find seats remaining and RMP
@@ -752,6 +778,8 @@ const App = () => {
                 func={() => addCourse(course)}
                 hoverFunc={() => setHoveredCourse(course)}
                 unhoverFunc={() => setHoveredCourse(null)}
+                showInfo={showCourseInfo}
+                showAttributes={showCourseAttributes}
               />
             ))}
           </InfiniteScroll>
