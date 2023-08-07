@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   scrape-python:
-    runs-on: macos-latest
+    runs-on: linux-latest
     steps:
     - uses: actions/checkout@v3
       with:
