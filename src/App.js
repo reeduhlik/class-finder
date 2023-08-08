@@ -264,8 +264,6 @@ const App = () => {
   };
 
   const addCourse = (course) => {
-    console.log(course);
-    console.log(calendars[activeCalendar].courses);
     if (!calendars[activeCalendar].courses.includes(course)) {
       setCalendars({
         ...calendars,
@@ -274,6 +272,7 @@ const App = () => {
           courses: [...calendars[activeCalendar].courses, course],
         },
       });
+      console.log(calendars);
     }
   };
 
@@ -282,9 +281,7 @@ const App = () => {
       ...calendars,
       [activeCalendar]: {
         ...calendars[activeCalendar],
-        courses: calendars[activeCalendar].courses.filter(
-          (item) => item !== course
-        ),
+        courses: calendars[activeCalendar].courses.filter((c) => c !== course),
       },
     });
   };
@@ -411,11 +408,7 @@ const App = () => {
       resetOptions();
     }
   };
-  const calculateCourseRating = (courseID) => {
-    //find index of course in instructor array based on instructor name
-
-    const course = findCourseByID(courseID);
-
+  const calculateCourseRating = (course) => {
     const instructorIndex = instructors.findIndex(
       (inst) => inst.instructor === course?.faculty[0]?.displayName
     );
@@ -835,7 +828,7 @@ const App = () => {
             <h4
               className="calendar-close"
               onClick={() => setShowCalendar(false)}></h4>
-            <h2>Your Calendar</h2>
+            <h2>Your Calendars</h2>
             <h4>{getCreditNumber()}</h4>
             <div className="calendar">
               <div className="calendar-day slot-label-column">
@@ -949,8 +942,8 @@ const App = () => {
                 </div>
               ))}
             </div>
-            <h2>Your Selected Courses</h2>
-            <p className="right-subtitle">Click on a course to reomve it.</p>
+            <h2>{calendars[activeCalendar].name}'s Courses</h2>
+            <p className="right-subtitle">Click on a course to remove it.</p>
             <div className="selected-courses">
               {calendars[activeCalendar].courses.map((course, index) => (
                 <CalendarCourse
