@@ -66,13 +66,22 @@ const App = () => {
 
   const [showIntro, setShowIntro] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedCourses, setSelectedCourses] = useState(() => {
-    const saved = localStorage.getItem("selectedCourses");
-    const initialValue = JSON.parse(saved);
-    return initialValue || [];
-  });
 
-  const [hoveredCourse, setHoveredCourse] = useState(null);
+  const [calendars, setCalendars] = useState(() => {
+    const saved = localStorage.getItem("calendars");
+    const initialValue = JSON.parse(saved);
+    return (
+      initialValue || [
+        {
+          name: "Calendar 1",
+          courses: [],
+        },
+      ]
+    );
+  });
+  const [activeCalendar, setActiveCalendar] = useState(0);
+
+  const [hoveredCourseID, setHoveredCourseID] = useState(null);
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [attributeOptions, setAttributeOptions] = useState([]);
   const [showCourseAttributes, setShowCourseAttributes] = useState(true);
@@ -128,7 +137,13 @@ const App = () => {
 
   const days = ["M", "T", "W", "Th", "F"];
 
-  const switchDayOfWeek = (course, day) => {
+  const switchDayOfWeek = (courseID, day) => {
+    //switch day of week of course
+    const course = findCourseByID(courseID);
+
+    console.log("FROM SWITCH DAY OF WEEK");
+    console.log(course);
+
     if (day === "M") {
       return course.meetingsFaculty[0].meetingTime.monday;
     } else if (day === "T") {
@@ -146,7 +161,10 @@ const App = () => {
     //copy all crns of selected courses to clipboard
     let crns = "";
     crns += "Your Course CRNs:\n\n";
-    selectedCourses.forEach((course) => {
+
+    calendars[activeCalendar].courses.forEach((courseID) => {
+      const course = findCourseByID(courseID);
+
       crns +=
         course.subjectCourse +
         " (" +
@@ -158,15 +176,13 @@ const App = () => {
     navigator.clipboard.writeText(crns);
   };
 
-  useEffect(() => {
-    localStorage.setItem("selectedCourses", JSON.stringify(selectedCourses));
-  }, [selectedCourses]);
-
   const getCreditNumber = () => {
     //add credit numbers together of selected courses
     let credits = 0;
 
-    selectedCourses.forEach((course) => {
+    calendars[activeCalendar].courses.forEach((courseID) => {
+      const course = findCourseByID(courseID);
+
       if (course.creditHours != null) {
         credits += course.creditHours;
       } else if (course.creditHourHigh != null) {
@@ -233,7 +249,6 @@ const App = () => {
 
   const [records, setrecords] = useState(12);
   const [hasMore, setHasMore] = useState(true);
-  const [loadingAnimation, setLoadingAnimation] = useState(false);
 
   const [startTime, setStartTime] = useState(timeOptions[0]);
   const [endTime, setEndTime] = useState(timeOptions[timeOptions.length - 1]);
@@ -249,15 +264,35 @@ const App = () => {
   };
 
   const addCourse = (course) => {
-    if (!selectedCourses.includes(course)) {
-      setSelectedCourses([...selectedCourses, course]);
-      setShowCalendar(true);
+    console.log(course);
+    console.log(calendars[activeCalendar].courses);
+    if (!calendars[activeCalendar].courses.includes(course)) {
+      setCalendars({
+        ...calendars,
+        [activeCalendar]: {
+          ...calendars[activeCalendar],
+          courses: [...calendars[activeCalendar].courses, course],
+        },
+      });
     }
   };
 
   const removeCourse = (course) => {
-    setSelectedCourses(selectedCourses.filter((c) => c.id !== course.id));
+    setCalendars({
+      ...calendars,
+      [activeCalendar]: {
+        ...calendars[activeCalendar],
+        courses: calendars[activeCalendar].courses.filter(
+          (item) => item !== course
+        ),
+      },
+    });
   };
+
+  //update calendar lcoal storage when calendar changes
+  useEffect(() => {
+    localStorage.setItem("calendars", JSON.stringify(calendars));
+  }, [calendars]);
 
   useEffect(() => {
     const usedAttributes = [];
@@ -276,6 +311,8 @@ const App = () => {
     courses.forEach((course) => {
       course.rating = calculateCourseRating(course);
       course.courseTitle = course.courseTitle.replace(/&amp;/g, "&");
+      course.courseTitle = course.courseTitle.replace(/&quot;/g, '"');
+      course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
     });
 
     console.log(courses[0]);
@@ -374,11 +411,13 @@ const App = () => {
       resetOptions();
     }
   };
-  const calculateCourseRating = (course) => {
+  const calculateCourseRating = (courseID) => {
     //find index of course in instructor array based on instructor name
 
+    const course = findCourseByID(courseID);
+
     const instructorIndex = instructors.findIndex(
-      (inst) => inst.instructor === course.faculty[0]?.displayName
+      (inst) => inst.instructor === course?.faculty[0]?.displayName
     );
 
     if (instructorIndex !== -1) {
@@ -388,9 +427,15 @@ const App = () => {
     }
   };
 
+  const findCourseByID = (id) => {
+    return courses.find((course) => course.id === id);
+  };
+
   const getBackgroundColor = (course) => {
     //find index of course in selected courses
-    const index = selectedCourses.findIndex((c) => c.id === course.id);
+    const index = calendars[activeCalendar].courses.findIndex(
+      (c) => c === course
+    );
     return colors[index % colors.length];
   };
 
@@ -405,9 +450,10 @@ const App = () => {
       if (filterConflicts) {
         let conflict = false;
 
-        selectedCourses.forEach((selectedCourse) => {
+        calendars[activeCalendar].courses.forEach((selectedCourseID) => {
+          const selectedCourse = findCourseByID(selectedCourseID);
           if (
-            selectedCourse.meetingsFaculty.length > 0 &&
+            selectedCourse?.meetingsFaculty.length > 0 &&
             course.meetingsFaculty.length > 0
           ) {
             if (
@@ -525,7 +571,7 @@ const App = () => {
     startTime,
     endTime,
     filterConflicts,
-    selectedCourses,
+    calendars,
     filterByRating,
   ]);
 
@@ -775,9 +821,9 @@ const App = () => {
               <Course
                 course={course}
                 key={course.id}
-                func={() => addCourse(course)}
-                hoverFunc={() => setHoveredCourse(course)}
-                unhoverFunc={() => setHoveredCourse(null)}
+                func={() => addCourse(course.id)}
+                hoverFunc={() => setHoveredCourseID(course.id)}
+                unhoverFunc={() => setHoveredCourseID(null)}
                 showInfo={showCourseInfo}
                 showAttributes={showCourseAttributes}
               />
@@ -812,10 +858,17 @@ const App = () => {
                   {times.map((time, index) => {
                     let hover = false;
                     //if any selected courses have a meeting at this time, display it
-                    const coursesAtTime = selectedCourses.filter((course) => {
+
+                    const coursesAtTime = calendars[
+                      activeCalendar
+                    ].courses.filter((courseID) => {
+                      const course = findCourseByID(courseID);
+
+                      console.log("Showing course found by ID: ", course);
+
                       if (course.meetingsFaculty.length > 0) {
                         return (
-                          switchDayOfWeek(course, day) &&
+                          switchDayOfWeek(courseID, day) &&
                           Number(
                             course.meetingsFaculty[0].meetingTime.beginTime
                           ) <= Number(time) &&
@@ -826,10 +879,12 @@ const App = () => {
                       }
                     });
 
-                    if (hoveredCourse) {
-                      if (hoveredCourse.meetingsFaculty.length > 0) {
+                    if (hoveredCourseID) {
+                      const hoveredCourse = findCourseByID(hoveredCourseID);
+
+                      if (hoveredCourse?.meetingsFaculty.length > 0) {
                         hover =
-                          switchDayOfWeek(hoveredCourse, day) &&
+                          switchDayOfWeek(hoveredCourseID, day) &&
                           Number(
                             hoveredCourse.meetingsFaculty[0].meetingTime
                               .beginTime
@@ -868,20 +923,22 @@ const App = () => {
                           }}>
                           {" "}
                           <div className="calendar-tooltip">
-                            <h5>{coursesAtTime[0].courseTitle}</h5>
+                            <h5>
+                              {findCourseByID(coursesAtTime[0]).courseTitle}
+                            </h5>
                             <h6>
-                              {coursesAtTime[0].subject} -{" "}
-                              {coursesAtTime[0].courseNumber}
+                              {findCourseByID(coursesAtTime[0]).subject} -{" "}
+                              {findCourseByID(coursesAtTime[0]).courseNumber}
                             </h6>
                             <h6>
                               {formatMilitaryTime(
-                                coursesAtTime[0].meetingsFaculty[0].meetingTime
-                                  .beginTime
+                                findCourseByID(coursesAtTime[0])
+                                  .meetingsFaculty[0].meetingTime.beginTime
                               )}{" "}
                               -{" "}
                               {formatMilitaryTime(
-                                coursesAtTime[0].meetingsFaculty[0].meetingTime
-                                  .endTime
+                                findCourseByID(coursesAtTime[0])
+                                  .meetingsFaculty[0].meetingTime.endTime
                               )}
                             </h6>
                           </div>
@@ -895,11 +952,11 @@ const App = () => {
             <h2>Your Selected Courses</h2>
             <p className="right-subtitle">Click on a course to reomve it.</p>
             <div className="selected-courses">
-              {selectedCourses.map((course, index) => (
+              {calendars[activeCalendar].courses.map((course, index) => (
                 <CalendarCourse
                   color={getBackgroundColor(course)}
-                  course={course}
-                  key={course.id}
+                  course={findCourseByID(course)}
+                  key={course}
                   func={() => removeCourse(course)}
                 />
               ))}

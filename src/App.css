@@ -1021,10 +1021,11 @@ backdrop-filter: blur(5px);
     margin-right: 0;
   }
   .options {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 100px);
     padding: 50px 50px;
     margin-top: 0px;
     margin-bottom: 0px;
+    overflow: scroll;
   }
   .option-button{
     display: block;
