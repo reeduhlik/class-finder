@@ -65,7 +65,7 @@ const App = () => {
   const attributesRef = useRef(null);
 
   const [showIntro, setShowIntro] = useState(true);
-  const [showCalendar, setShowCalendar] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState(() => {
     const saved = localStorage.getItem("selectedCourses");
     const initialValue = JSON.parse(saved);
@@ -160,7 +160,6 @@ const App = () => {
 
   useEffect(() => {
     localStorage.setItem("selectedCourses", JSON.stringify(selectedCourses));
-    setShowCalendar(true);
   }, [selectedCourses]);
 
   const getCreditNumber = () => {
@@ -252,6 +251,7 @@ const App = () => {
   const addCourse = (course) => {
     if (!selectedCourses.includes(course)) {
       setSelectedCourses([...selectedCourses, course]);
+      setShowCalendar(true);
     }
   };
 
