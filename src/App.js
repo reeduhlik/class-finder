@@ -22,7 +22,12 @@ import { inject } from "@vercel/analytics";
 //import stuff to do animation on scroll
 import "animate.css/animate.min.css";
 import { AnimationOnScroll } from "react-animation-on-scroll";
-import { FaSliders, FaRegCalendar, FaMagnifyingGlass } from "react-icons/fa6";
+import {
+  FaSliders,
+  FaRegCalendar,
+  FaMagnifyingGlass,
+  FaX,
+} from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
 import IntroScreen from "./IntroScreen";
@@ -73,7 +78,15 @@ const App = () => {
     return (
       initialValue || [
         {
-          name: "Calendar 1",
+          name: "Plan #1",
+          courses: [],
+        },
+        {
+          name: "Plan #2",
+          courses: [],
+        },
+        {
+          name: "Plan #3",
           courses: [],
         },
       ]
@@ -141,9 +154,6 @@ const App = () => {
     //switch day of week of course
     const course = findCourseByID(courseID);
 
-    console.log("FROM SWITCH DAY OF WEEK");
-    console.log(course);
-
     if (day === "M") {
       return course.meetingsFaculty[0].meetingTime.monday;
     } else if (day === "T") {
@@ -180,7 +190,7 @@ const App = () => {
     //add credit numbers together of selected courses
     let credits = 0;
 
-    calendars[activeCalendar].courses.forEach((courseID) => {
+    calendars[activeCalendar]?.courses.forEach((courseID) => {
       const course = findCourseByID(courseID);
 
       if (course.creditHours != null) {
@@ -263,6 +273,16 @@ const App = () => {
     }
   };
 
+  const addCalendar = (calendar) => {
+    setCalendars({
+      ...calendars,
+      [calendar]: {
+        name: `Calendar #${calendar + 1}`,
+        courses: [],
+      },
+    });
+  };
+
   const addCourse = (course) => {
     if (!calendars[activeCalendar].courses.includes(course)) {
       setCalendars({
@@ -272,7 +292,8 @@ const App = () => {
           courses: [...calendars[activeCalendar].courses, course],
         },
       });
-      console.log(calendars);
+      setHoveredCourseID(null);
+      setShowCalendar(true);
     }
   };
 
@@ -310,9 +331,8 @@ const App = () => {
       course.courseTitle = course.courseTitle.replace(/&amp;/g, "&");
       course.courseTitle = course.courseTitle.replace(/&quot;/g, '"');
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
+      course.courseTitle = course.courseTitle.replace("&#39;", "'");
     });
-
-    console.log(courses[0]);
   }, []);
 
   const resetOptions = () => {
@@ -324,11 +344,11 @@ const App = () => {
     setFilterConflicts(false);
     setStartTime(timeOptions[0]);
     setEndTime(timeOptions[timeOptions.length - 1]);
+    setSearchTerm("");
   };
 
   const handleKeyDown = async (e) => {
     //if either inputs are focused, don't do anything
-    console.log(document.activeElement.tagName);
 
     //if the active element is any of the inputs, don't do anything
     if (document.activeElement.tagName === "INPUT") {
@@ -346,10 +366,11 @@ const App = () => {
       e.preventDefault();
       setOpenModal(!openModal);
     } else if (e.key === "Enter") {
-      if (openModal) {
-        setOpenModal(false);
-      } else {
+      e.preventDefault();
+      if (!openModal) {
         setShowCalendar(!showCalendar);
+      } else {
+        setOpenModal(false);
       }
     } else if (e.key === ";") {
       onCopyClick();
@@ -566,6 +587,7 @@ const App = () => {
     filterConflicts,
     calendars,
     filterByRating,
+    activeCalendar,
   ]);
 
   useEventListener("keydown", handleKeyDown);
@@ -780,6 +802,7 @@ const App = () => {
               <input
                 type="text"
                 className="main-input extra-padding"
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
                   e.key === "Escape" && inputRef.current.blur();
@@ -822,13 +845,38 @@ const App = () => {
               />
             ))}
           </InfiniteScroll>
+          {filteredCourses.length === 0 && (
+            <div className="no-results">
+              <h2>Whoops, no classes found.</h2>
+              <p>
+                Check your search term for typos, or expand your search filters.
+              </p>
+              <div className="no-results-content">
+                <h6 className="keyboard-outline">Tab</h6>
+                <h6>Reset all filters</h6>
+              </div>
+            </div>
+          )}
         </div>
         {showCalendar && (
           <div className="right animate__animated animate__slideInRight animate__faster">
             <h4
               className="calendar-close"
               onClick={() => setShowCalendar(false)}></h4>
-            <h2>Your Calendars</h2>
+            <h2>Your Schedules</h2>
+            <div className="calendar-list">
+              {Object.keys(calendars).map((calendar, index) => (
+                <div
+                  className={`calendar-item ${
+                    activeCalendar === index ? "active-calendar" : ""
+                  }`}
+                  onClick={() => setActiveCalendar(index)}>
+                  <h6>{calendars[calendar].name}</h6>
+                  <p>{calendars[calendar].courses.length} courses</p>
+                </div>
+              ))}
+            </div>
+            <div className="calendar-list"></div>
             <h4>{getCreditNumber()}</h4>
             <div className="calendar">
               <div className="calendar-day slot-label-column">
@@ -856,8 +904,6 @@ const App = () => {
                       activeCalendar
                     ].courses.filter((courseID) => {
                       const course = findCourseByID(courseID);
-
-                      console.log("Showing course found by ID: ", course);
 
                       if (course.meetingsFaculty.length > 0) {
                         return (
@@ -943,7 +989,9 @@ const App = () => {
               ))}
             </div>
             <h2>{calendars[activeCalendar].name}'s Courses</h2>
-            <p className="right-subtitle">Click on a course to remove it.</p>
+            <p className="right-subtitle">
+              Click a course to remove it from this plan.
+            </p>
             <div className="selected-courses">
               {calendars[activeCalendar].courses.map((course, index) => (
                 <CalendarCourse
@@ -954,6 +1002,14 @@ const App = () => {
                 />
               ))}
             </div>
+            {calendars[activeCalendar].courses.length === 0 && (
+              <div className="empty-calendar">
+                <p>
+                  No courses added yet. Click on a course to add it to this
+                  plan.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

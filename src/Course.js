@@ -209,12 +209,14 @@ const Course = ({
           </div>
         </div>
       )}
-      {course.seatsAvailable == 1 && course.waitCount > 0 && (
-        <div className="course-alert">
-          <img src="/icons/alert.svg" alt="alert" />
-          <p>Open seat likely from WL</p>
-        </div>
-      )}
+      {course.seatsAvailable > 0 &&
+        course.seatsAvailable < 4 &&
+        course.waitCount > 3 && (
+          <div className="course-alert">
+            <img src="/icons/alert.svg" alt="alert" />
+            <p>Open seat(s) likely reserved for WL.</p>
+          </div>
+        )}
       {course.seatsAvailable == 0 && (
         <div className="course-warning">
           <img src="/icons/alert.svg" alt="alert" />
