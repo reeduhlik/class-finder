@@ -75,8 +75,8 @@ const App = () => {
   const [calendars, setCalendars] = useState(() => {
     const saved = localStorage.getItem("calendars");
     const initialValue = JSON.parse(saved);
-    return (
-      initialValue || [
+    if (initialValue && Object.keys(initialValue)?.length !== 3) {
+      return [
         {
           name: "Plan #1",
           courses: [],
@@ -89,8 +89,25 @@ const App = () => {
           name: "Plan #3",
           courses: [],
         },
-      ]
-    );
+      ];
+    } else {
+      return (
+        initialValue || [
+          {
+            name: "Plan #1",
+            courses: [],
+          },
+          {
+            name: "Plan #2",
+            courses: [],
+          },
+          {
+            name: "Plan #3",
+            courses: [],
+          },
+        ]
+      );
+    }
   });
   const [activeCalendar, setActiveCalendar] = useState(0);
 
