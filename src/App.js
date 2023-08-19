@@ -48,7 +48,10 @@ const mergePages = () => {
     page11.data
   );
 
-  return data;
+  //filter out all null courses
+  const newData = data.filter((course) => course != null);
+
+  return newData;
 
   //write certain fields to csv file
 };
@@ -330,6 +333,8 @@ const App = () => {
   }, [calendars]);
 
   useEffect(() => {
+    //filter all null couress
+
     const usedAttributes = [];
     courses.map((course) => {
       course.sectionAttributes.map((attribute) => {
