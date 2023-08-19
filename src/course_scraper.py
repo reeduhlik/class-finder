@@ -5,12 +5,14 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+import urllib.request
 import json
 
 
 options = Options()
-options.headless = True
-service = Service(executable_path='./chromedriver_mac64/chromedriver.exe')
+options.headless = False
+service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(options=options, service=service)
 
 firsturl = "https://myaccess.georgetown.edu/"
@@ -47,13 +49,15 @@ try:
     for i in range(0, 12):
         print(" Fetching page " + str(i))
         driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202330&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
+        print("  Page " + str(i) + " fetched.")
         pre = driver.find_element(By.TAG_NAME, "pre").text
         data = json.loads(pre)
     #store the json data from the url in a file called data.json
-        with open(f'src/page{i}.json', 'w') as f:
+        with open(f'./page{i}.json', 'w') as f:
             json.dump(data, f)
-except:
+except Exception as e:
     print("Duo timed out.")
+    print(e)
 
 
 
