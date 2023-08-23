@@ -7,8 +7,8 @@ const IntroScreen = (props) => {
       <div className="introscreen animate__animated animate__zoomIn">
         <h2>Introducing Hoya Courses!</h2>
         <h5>
-          The easiest way to build your perfect schedule and find classes you
-          need. Built by Reed Uhlik.
+          The all-new, easiest way to build your perfect schedule and find
+          classes you need. Built by Reed Uhlik.
         </h5>
         <div className="introscreen-features">
           <div className="introscreen-feature animate__animated animate__zoomInUp animate__delay-1s">
@@ -16,8 +16,9 @@ const IntroScreen = (props) => {
             <div className="introscreen-feature-text">
               <h4>View Seats Remaining</h4>
               <p>
-                See how many seats are left in a class before you register.
-                Don't waste your time searching for courses already full.
+                See how many seats (and waitlist seats) are left in a class
+                before you register. Don't waste your time searching for courses
+                already full.
               </p>
             </div>
           </div>
