@@ -637,7 +637,7 @@ const App = () => {
               <h6 className="keyboard-outline">Space</h6>
             </div>
             <p className="app-settings-subtitle">
-              Thoughtfully designed to make your experience perfect.
+              Thoughtfully designed to make your experience seamless.
             </p>
 
             <div className="options-content">
@@ -809,15 +809,12 @@ const App = () => {
       <div className="container">
         <div className="content">
           <div className="header">
-            <a target="_blank" href="https://hoyadevelopers.com">
-              <img src="hd-logo.png" alt="logo" />
-            </a>
-
             <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
-            The best way to find classes you need. Find seats remaining and RMP
-            ratings all in one place. Blazingly Fast.
+            The absolute best way to find classes you need. See course
+            information, seats remaining, and RateMyProfessor ratings all in one
+            place. Blazingly Fast.
           </h5>
           <div className="searchFields">
             <div className="wrapper-input">
@@ -870,9 +867,7 @@ const App = () => {
           {filteredCourses.length === 0 && (
             <div className="no-results">
               <h2>Whoops, no classes found.</h2>
-              <p>
-                Check your search term for typos, or expand your search filters.
-              </p>
+              <p>Check your search for typos, or expand your search filters.</p>
               <div className="no-results-content">
                 <h6 className="keyboard-outline">Tab</h6>
                 <h6>Reset all filters</h6>
