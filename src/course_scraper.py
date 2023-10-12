@@ -5,15 +5,17 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+import undetected_chromedriver as uc
 from webdriver_manager.chrome import ChromeDriverManager
 import urllib.request
 import json
 
 
 options = Options()
-options.headless = False
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(options=options, service=service)
+options.headless = True
+driver = uc.Chrome(driver_executable_path=ChromeDriverManager().install(), options=options)
+
+
 
 firsturl = "https://myaccess.georgetown.edu/"
 secondurl="https://myaccess9.georgetown.edu/BannerExtensibility/customPage/page/HOMEPAGE"
