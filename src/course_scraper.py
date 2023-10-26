@@ -11,9 +11,15 @@ import urllib.request
 import json
 
 
-options = Options()
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+
+service = Service()
+options = webdriver.ChromeOptions()
 options.headless = True
-driver = uc.Chrome(driver_executable_path=ChromeDriverManager().install(), options=options)
+driver = webdriver.Chrome(service=service, options=options)
+
+
 
 
 

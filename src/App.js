@@ -809,7 +809,7 @@ const App = () => {
       <div className="container">
         <div className="content">
           <div className="header">
-            <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
+            <h1 onClick={() => setShowIntro(true)}>Hoya Courses S24</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
             The absolute best way to find classes you need. See course
@@ -848,7 +848,12 @@ const App = () => {
             hasMore={hasMore}
             loader={
               <div className="loader-container">
-                <HashLoader loading={true} size={50} className="loader" />
+                <HashLoader
+                  loading={true}
+                  size={50}
+                  className="loader"
+                  color="#aaa"
+                />
                 <p>Loading more classes, hang tight.</p>
               </div>
             }>
