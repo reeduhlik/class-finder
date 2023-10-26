@@ -56,7 +56,7 @@ const mergePages = () => {
   //write certain fields to csv file
 };
 
-const App = () => {
+const AppDark = () => {
   inject();
   const formatMilitaryTime = (time) => {
     if (!time) {
@@ -721,6 +721,7 @@ const App = () => {
                 <h5>Filter by attribute</h5>
                 <div className="option">
                   <Select
+                    unstyled
                     isMulti
                     name="attributes"
                     defaultValue={attributes}
@@ -729,6 +730,45 @@ const App = () => {
                     onChange={(e) => setAttributes(e)}
                     placeholder="Filter by Attribute"
                     ref={attributesRef}
+                    styles={{
+                      option: (base) => ({
+                        ...base,
+                        backgroundColor: "#222",
+                        color: "#aaa",
+                        padding: "10px 10px",
+                        fontFamily: "Urbanist",
+                        "&:hover": {
+                          backgroundColor: "#333",
+                          cursor: "pointer",
+                        },
+                      }),
+                      control: (base) => ({
+                        ...base,
+                        border: 0,
+                        boxShadow: "none",
+                        backgroundColor: "#222",
+                        color: "#aaa",
+                        width: "100%",
+                        fontWeight: 500,
+                        fontFamily: "Urbanist",
+                        height: "50px",
+                        borderRadius: "3px",
+                        padding: "0 10px",
+                        cursor: "pointer",
+                        "&:hover": {
+                          border: 0,
+                        },
+                      }),
+                      multiValue: (base) => ({
+                        ...base,
+                        backgroundColor: "#444",
+                        color: "#aaa",
+                        fontFamily: "Ubranist",
+                        borderRadius: "3px",
+                        padding: "2px 10px",
+                        margin: "0 5px",
+                      }),
+                    }}
                   />
                 </div>
                 <div className="time-options">
@@ -736,21 +776,92 @@ const App = () => {
                   <h5>Class ends before...</h5>
                   <div className="option">
                     <Select
+                      unstyled
                       name="start-time"
                       options={timeOptions}
                       value={{ label: startTime.label }}
                       className="time-select"
                       onChange={(e) => setStartTime(e)}
+                      styles={{
+                        option: (base) => ({
+                          ...base,
+                          backgroundColor: "#222",
+                          color: "#aaa",
+                          padding: "10px 10px",
+                          fontFamily: "Urbanist",
+                          "&:hover": {
+                            backgroundColor: "#333",
+                            cursor: "pointer",
+                          },
+                        }),
+                        control: (base) => ({
+                          ...base,
+                          border: 0,
+                          boxShadow: "none",
+                          backgroundColor: "#222",
+                          color: "#aaa",
+                          width: "100%",
+                          fontWeight: 500,
+                          fontFamily: "Urbanist",
+                          height: "50px",
+                          borderRadius: "3px",
+                          padding: "0 10px",
+                          cursor: "pointer",
+                          "&:hover": {
+                            border: 0,
+                          },
+                        }),
+                      }}
                     />
                   </div>
 
                   <div className="option">
                     <Select
+                      unstyled
                       name="end-time"
                       value={{ label: endTime.label }}
                       className="time-select"
                       options={timeOptions}
                       onChange={(e) => setEndTime(e)}
+                      styles={{
+                        option: (base) => ({
+                          ...base,
+                          backgroundColor: "#222",
+                          color: "#aaa",
+                          padding: "10px 10px",
+                          fontFamily: "Urbanist",
+                          "&:hover": {
+                            backgroundColor: "#333",
+                            cursor: "pointer",
+                          },
+                        }),
+                        control: (base) => ({
+                          ...base,
+                          border: 0,
+                          boxShadow: "none",
+                          backgroundColor: "#222",
+                          color: "#aaa",
+                          width: "100%",
+                          fontWeight: 500,
+                          fontFamily: "Urbanist",
+                          height: "50px",
+                          borderRadius: "3px",
+                          padding: "0 10px",
+                          cursor: "pointer",
+                          "&:hover": {
+                            border: 0,
+                          },
+                        }),
+                        multiValue: (base) => ({
+                          ...base,
+                          backgroundColor: "#444",
+                          color: "#aaa",
+                          fontFamily: "Ubranist",
+                          borderRadius: "3px",
+                          padding: "2px 10px",
+                          margin: "0 5px",
+                        }),
+                      }}
                     />
                   </div>
                 </div>
@@ -812,9 +923,9 @@ const App = () => {
             <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
-            The best way to find classes you need at Georgetown. See course
-            information, seats remaining, and RateMyProfessor ratings all in one
-            place. Blazingly Fast. Now available for Spring 2024!
+            The best way to find classes you need. See course information, seats
+            remaining, and RateMyProfessor ratings all in one place. Blazingly
+            Fast.
           </h5>
           <div className="searchFields">
             <div className="wrapper-input">
@@ -1039,4 +1150,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default AppDark;

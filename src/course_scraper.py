@@ -16,7 +16,7 @@ from selenium.webdriver.chrome.service import Service
 
 service = Service()
 options = webdriver.ChromeOptions()
-options.headless = True
+options.headless = False
 driver = webdriver.Chrome(service=service, options=options)
 
 
@@ -56,7 +56,7 @@ try:
 
     for i in range(0, 12):
         print(" Fetching page " + str(i))
-        driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202330&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
+        driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202410&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
         print("  Page " + str(i) + " fetched.")
         pre = driver.find_element(By.TAG_NAME, "pre").text
         data = json.loads(pre)
