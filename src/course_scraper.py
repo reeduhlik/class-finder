@@ -45,8 +45,8 @@ try:
     code = driver.execute_script("return window.sessionStorage.getItem('xe.unique.session.storage.id')")
 
     driver.find_element(By.CLASS_NAME, "select2-arrow").click()
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202330')))
-    driver.find_element(By.ID, "202330").click()
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202410')))
+    driver.find_element(By.ID, "202410").click()
     driver.find_element(By.ID, "term-go").click()
 
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'search-go')))
@@ -61,7 +61,7 @@ try:
         pre = driver.find_element(By.TAG_NAME, "pre").text
         data = json.loads(pre)
     #store the json data from the url in a file called data.json
-        with open(f'./page{i}.json', 'w') as f:
+        with open(f'./src/page{i}.json', 'w') as f:
             json.dump(data, f)
 except Exception as e:
     print("Duo timed out.")
