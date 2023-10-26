@@ -77,8 +77,12 @@ const AppDark = () => {
 
   const [calendars, setCalendars] = useState(() => {
     const saved = localStorage.getItem("calendars");
+    const semester = localStorage.getItem("semester") || "";
     const initialValue = JSON.parse(saved);
-    if (initialValue && Object.keys(initialValue)?.length !== 3) {
+    if (
+      semester !== "s24" ||
+      (initialValue && Object.keys(initialValue)?.length !== 3)
+    ) {
       return [
         {
           name: "Plan #1",
@@ -315,6 +319,9 @@ const AppDark = () => {
       setHoveredCourseID(null);
       setShowCalendar(true);
     }
+
+    //set local storage to new calendars
+    localStorage.setItem("semester", "s24");
   };
 
   const removeCourse = (course) => {
@@ -334,6 +341,8 @@ const AppDark = () => {
 
   useEffect(() => {
     //filter all null couress
+
+    //if there are old courses stored in session storage, clear it
 
     const usedAttributes = [];
     courses.map((course) => {
