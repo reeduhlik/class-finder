@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        token: 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
+        token: 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
         ref: ${{ github.head_ref }}
     - uses: actions/setup-python@v4
       with:
