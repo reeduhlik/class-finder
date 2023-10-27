@@ -5,10 +5,10 @@ const IntroScreen = (props) => {
   return (
     <div className="introscreen-bg">
       <div className="introscreen animate__animated animate__zoomIn">
-        <h2>Introducing Hoya Courses!</h2>
+        <h2>Weclome to Hoya Courses!</h2>
         <h5>
-          The all-new, easiest way to build your perfect schedule and find
-          classes you need. Built by Reed Uhlik.
+          The easiest way to build your perfect schedule and find classes you
+          need. Built by Reed Uhlik.
         </h5>
         <div className="introscreen-features">
           <div className="introscreen-feature animate__animated animate__zoomInUp animate__delay-1s">
@@ -27,8 +27,9 @@ const IntroScreen = (props) => {
             <div className="introscreen-feature-text">
               <h4>RateMyProfessor Ratings</h4>
               <p>
-                See a professor's RMP rating directly next to their name. No
-                more multiple tabs.
+                View a professor's RMP rating directly next to their name -
+                click on it to go directly to their RMP page. No more multiple
+                tabs.
               </p>
             </div>
           </div>
@@ -46,8 +47,8 @@ const IntroScreen = (props) => {
             <div className="introscreen-feature-text">
               <h4>Powerful Search</h4>
               <p>
-                Search that just makes sense. Built with useful filters and a
-                powerful search engine.
+                Search that just makes sense. Search by course name, professor,
+                course code. Hide conflicting classes, full classes, and more.
               </p>
             </div>
           </div>
