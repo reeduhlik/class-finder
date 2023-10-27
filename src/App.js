@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import instructors from "./instructors";
 import Course from "./Course";
 import CalendarCourse from "./CalendarCourse";
-import "./AppDark.css";
+import "./App.css";
 import page0 from "./page0.json";
 import page1 from "./page1.json";
 import page2 from "./page2.json";
