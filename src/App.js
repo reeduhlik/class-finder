@@ -56,6 +56,7 @@ import {
   FaX,
   FaCheck,
   FaExpand,
+  FaCopy,
 } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
@@ -963,8 +964,8 @@ const App = () => {
                     encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
                   }>
                   {showExpandedInfo.faculty.length > 0
-                    ? showExpandedInfo.ratingDifficulty
-                    : "N/A"}
+                    ? showExpandedInfo.ratingDifficulty + " Difficulty"
+                    : "N/A Difficulty"}
 
                   {showExpandedInfo.rating !== "N/A" &&
                     showExpandedInfo.ratingDifficulty < 2.5 && (
@@ -1288,9 +1289,7 @@ const App = () => {
             <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
           </div>
           <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
-            The best way to find classes you need at Georgetown. See course
-            information, seats remaining, and RateMyProfessor ratings all in one
-            place. Blazingly Fast. Now available for Spring 2024!
+            The best way to find classes at Georgetown. Built for students.
           </h5>
           <div className="searchFields">
             <div className="wrapper-input">
@@ -1362,7 +1361,13 @@ const App = () => {
             <h4
               className="calendar-close"
               onClick={() => setShowCalendar(false)}></h4>
-            <h2>Your Schedules</h2>
+            <div className="calendar-header">
+              <h2>Your Schedules</h2>
+              <button className="calendar-copy" onClick={onCopyClick}>
+                <p>Copy CRNs</p>
+                <FaCopy />
+              </button>
+            </div>
             <div className="calendar-list">
               {Object.keys(calendars).map((calendar, index) => (
                 <div

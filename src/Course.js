@@ -4,7 +4,7 @@ import "animate.css";
 import { useState, useEffect } from "react";
 import useEventListener from "@use-it/event-listener";
 
-import { FaExpand } from "react-icons/fa6";
+import { FaExpand, FaPlus } from "react-icons/fa6";
 
 const Course = ({
   course,
@@ -244,7 +244,7 @@ const Course = ({
           <FaExpand />
         </button>
         <button className="course-button" onClick={func}>
-          +
+          <FaPlus />
         </button>
       </div>
     </div>
