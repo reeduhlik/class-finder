@@ -96,8 +96,9 @@ body{
 .course{
   padding: 25px;
   box-shadow: 0px 0px 15px -5px rgba(0,0,0,0.25);
-  border: 2px solid #eee;
+  border: 1px solid #eee;
   border-radius: 8px;
+  position: relative;
   background-color: #fff;
   transition: .3s all;
 }
@@ -105,7 +106,7 @@ body{
 .course:hover{
   cursor: pointer;
   box-shadow: 0px 0px 35px -5px rgba(0,0,0,0.25);
-  border: 2px solid #aaa;
+  border: 1px solid #aaa;
 }
 
 .content{
@@ -156,6 +157,12 @@ body{
 .course-icons {
   display: grid;
   grid-template-columns: 1.65fr 1fr;
+  margin-top: 15px;
+}
+
+.course-icons-expanded{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; 
   margin-top: 15px;
 }
 
@@ -384,6 +391,49 @@ text-align: center;
   justify-content: start;
 }
 
+.course-button {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: navy;
+  color: white;
+  font-size: 32px;
+  height: 48px;
+  width: 48px;
+  border-radius: 999px;
+  opacity: 0;
+  transition: .3s all;
+  border: 2px solid lightblue;
+}
+
+.course-button-more {
+  position: absolute;
+  bottom: 70px;
+  right: 15px;
+  background-color: #aaa;
+  color: white;
+  font-size: 20px;
+  line-height: 48px;
+  height: 48px;
+  border: none;
+  width: 48px;
+  border-radius: 999px;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: .3s all;
+}
+
+.course:hover .course-button, .course:hover .course-button-more{
+  opacity: 1;
+  cursor: pointer;
+}
+
+.course-button:hover{
+  box-shadow: 0px 0px 55px 10px rgba(0,0,0,0.25);
+}
+
 .course-warning{
 
   display: flex;
@@ -550,8 +600,10 @@ text-align: center;
 
 .options {
   width: fit-content;
+  max-width: 800px;
   margin: 0 auto;
   margin-top: 50px;
+  margin-bottom: 100px;
   background-color: white;
   border-radius: 10px;
   padding: 70px 100px;
@@ -560,6 +612,70 @@ text-align: center;
 
 }
 
+.options-expanded-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.options-expanded-button-add {
+  border: 1px solid navy;
+  background: navy;
+
+  color: white;
+  padding: 10px 30px;
+  border-radius: 5px;
+  font-size: 20px;
+  font-weight: bolder;
+  cursor: pointer;
+  transition: .3s all;
+}
+.options-expanded-button-close {
+  border: 1px solid navy;
+  background: white;
+  color: navy;
+  padding: 10px 30px;
+  border-radius: 5px;
+  font-size: 20px;
+  font-weight: bolder;
+  cursor: pointer;
+  transition: .3s all;
+}
+
+.options-preq-checker-status {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  margin-top: 40px;
+}
+.options-preq-checker-status span {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 2px 20px;
+  line-height: 0px;
+  height: min-content;
+  color: white;
+}
+
+.red-bg{
+  background: darkred;
+}
+.green-bg{
+  background: green;
+}
+
+.options-preq-checker-status span p{
+  color: white;
+  margin-right: 10px;
+  font-size: 20px;
+  font-weight: lighter;
+}
 
 .react-loader {
   padding: 100px;
@@ -589,6 +705,97 @@ align-items: start;
 .option-button{
   display: none;
 }
+
+.options-expanded-header{ 
+  font-size: 20px;
+  margin-bottom: 0px;
+}
+
+
+.options-preq-selectors {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-gap: 10px;
+  margin-bottom: -30px;
+}
+.options-preq-selector {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.options-expanded-status {
+  font-size: 20px;
+}
+
+.custom-checkbox-container{
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 22px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border-radius: 3px;
+
+}
+
+.custom-checkbox-container input{
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
+
+.custom-checkbox-container:hover input ~ .checkmark {
+  background-color: #eee;
+}
+
+/* When the checkbox is checked, add a blue background */
+.custom-checkbox-container input:checked ~ .checkmark {
+  background-color: navy;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.custom-checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.custom-checkbox-container .checkmark:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+
+
 .options-content-left {
   width: fit-content;
   margin-right: 100px;
@@ -664,6 +871,7 @@ h1{
   height: 100vh;
   background: rgba(50,50,50,0.2);
 backdrop-filter: blur(5px);
+overflow: scroll;
 }
 
 .introscreen {
@@ -762,10 +970,11 @@ backdrop-filter: blur(5px);
 }
 
 .calendar-slot {
-  height: 10px;
+  height: 2px;
   width: 100%;
   border-radius: 1px;
   position: relative;
+
 
 }
 
@@ -797,7 +1006,7 @@ backdrop-filter: blur(5px);
 
 
 .border-top {
-  height: 9px;
+  height: 0px;
   border-top: 1px solid #aaa;
 }
 
@@ -887,10 +1096,12 @@ backdrop-filter: blur(5px);
 .slot-empty{
   background-color: white;
   transition: .3s all;
+
 }
 .slot-filled{
   background-color: #49A7C5;
   transition: .3s all;
+
 }
 
 .calendar-list {
@@ -1025,6 +1236,11 @@ backdrop-filter: blur(5px);
   .introscreen{
     padding: 30px;
   }
+  .introscreen-bg{
+    height: max-content;
+    overflow: auto;
+    min-height: 100vh;
+  }
 
 }
 
@@ -1042,8 +1258,17 @@ backdrop-filter: blur(5px);
 }
   
 @media screen and (max-width: 700px) {
-  .course-icons {
+
+  .options-preq-selectors{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .course-icons, .course-icons-expanded {
     grid-template-columns: 1fr;
+
+  }
+  .options-expanded-buttons {
+    padding-bottom: 150px;
   }
   .course-top {
     flex-direction: column-reverse;
@@ -1116,8 +1341,10 @@ backdrop-filter: blur(5px);
     height: calc(100vh - 100px);
     padding: 50px 50px;
     margin-top: 0px;
-    margin-bottom: 0px;
+
+    padding-bottom: 250px;
     overflow: scroll;
+
   }
   .option-button{
     display: block;
@@ -1127,12 +1354,23 @@ backdrop-filter: blur(5px);
     color: navy;
     background: white;
     padding-top: 15px;
-    padding-bottom: 15px;
+    padding-bottom: 11px;
     font-weight: bold;
     font-size: 18px;
     border: 2px solid navy;
     border-radius: 3px;
+    margin-bottom: 100px;
   }
+
+  .course-button, .course-button-more {
+    opacity: 1;
+  }
+
+.empty-calendar{
+  margin-bottom: 150px;
+}
+.selected-courses{
+  margin-bottom: 100px;}
 
 }
 

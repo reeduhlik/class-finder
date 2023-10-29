@@ -1,6 +1,10 @@
 import React from "react";
 import instructors from "./instructors";
 import "animate.css";
+import { useState, useEffect } from "react";
+import useEventListener from "@use-it/event-listener";
+
+import { FaExpand } from "react-icons/fa6";
 
 const Course = ({
   course,
@@ -9,7 +13,10 @@ const Course = ({
   unhoverFunc,
   showAttributes,
   showInfo,
+  showInfoToggle,
 }) => {
+  const [show, setShow] = useState(0);
+
   const calculateCourseRating = (course) => {
     //find index of course in instructor array based on instructor name
     const instructorIndex = instructors.findIndex(
@@ -120,7 +127,6 @@ const Course = ({
   return (
     <div
       className="course animate__animated animate__fadeIn animate__faster"
-      onClick={func}
       onMouseEnter={hoverFunc}
       onMouseLeave={unhoverFunc}>
       <div className="course-top">
@@ -133,7 +139,7 @@ const Course = ({
       </div>
       <h2>{formatTitle(course.courseTitle)}</h2>
       <h6>{getCreditHours()}</h6>
-      {showInfo && (
+      {showInfoToggle && (
         <div className="course-icons">
           <div className="course-icon">
             <img src="/icons/instructor.svg" alt="instructor" />
@@ -233,6 +239,14 @@ const Course = ({
             })}
         </div>
       )}
+      <div className="course-buttons">
+        <button className="course-button-more" onClick={() => showInfo(course)}>
+          <FaExpand />
+        </button>
+        <button className="course-button" onClick={func}>
+          +
+        </button>
+      </div>
     </div>
   );
 };

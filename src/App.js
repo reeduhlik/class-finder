@@ -16,6 +16,33 @@ import page8 from "./page8.json";
 import page9 from "./page9.json";
 import page10 from "./page10.json";
 import page11 from "./page11.json";
+
+import descriptions0 from "./descriptions0.json";
+import descriptions1 from "./descriptions1.json";
+import descriptions2 from "./descriptions2.json";
+import descriptions3 from "./descriptions3.json";
+import descriptions4 from "./descriptions4.json";
+import descriptions5 from "./descriptions5.json";
+import descriptions6 from "./descriptions6.json";
+import descriptions7 from "./descriptions7.json";
+import descriptions8 from "./descriptions8.json";
+import descriptions9 from "./descriptions9.json";
+import descriptions10 from "./descriptions10.json";
+import descriptions11 from "./descriptions11.json";
+
+import prereqs0 from "./prereqs0.json";
+import prereqs1 from "./prereqs1.json";
+import prereqs2 from "./prereqs2.json";
+import prereqs3 from "./prereqs3.json";
+import prereqs4 from "./prereqs4.json";
+import prereqs5 from "./prereqs5.json";
+import prereqs6 from "./prereqs6.json";
+import prereqs7 from "./prereqs7.json";
+import prereqs8 from "./prereqs8.json";
+import prereqs9 from "./prereqs9.json";
+import prereqs10 from "./prereqs10.json";
+import prereqs11 from "./prereqs11.json";
+
 import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 import { inject } from "@vercel/analytics";
@@ -27,6 +54,8 @@ import {
   FaRegCalendar,
   FaMagnifyingGlass,
   FaX,
+  FaCheck,
+  FaExpand,
 } from "react-icons/fa6";
 import Toggle from "react-toggle";
 import Select from "react-select";
@@ -56,6 +85,42 @@ const mergePages = () => {
   //write certain fields to csv file
 };
 
+const mergeDescriptions = () => {
+  const data = descriptions0.concat(
+    descriptions1,
+    descriptions2,
+    descriptions3,
+    descriptions4,
+    descriptions5,
+    descriptions6,
+    descriptions7,
+    descriptions8,
+    descriptions9,
+    descriptions10,
+    descriptions11
+  );
+
+  return data;
+};
+
+const mergePrereqs = () => {
+  const data = prereqs0.concat(
+    prereqs1,
+    prereqs2,
+    prereqs3,
+    prereqs4,
+    prereqs5,
+    prereqs6,
+    prereqs7,
+    prereqs8,
+    prereqs9,
+    prereqs10,
+    prereqs11
+  );
+
+  return data;
+};
+
 const App = () => {
   inject();
   const formatMilitaryTime = (time) => {
@@ -74,6 +139,7 @@ const App = () => {
 
   const [showIntro, setShowIntro] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [preReqStatus, setPreReqStatus] = useState(false);
 
   const [calendars, setCalendars] = useState(() => {
     const saved = localStorage.getItem("calendars");
@@ -119,45 +185,101 @@ const App = () => {
   const [attributeOptions, setAttributeOptions] = useState([]);
   const [showCourseAttributes, setShowCourseAttributes] = useState(true);
   const [showCourseInfo, setShowCourseInfo] = useState(true);
+  const [showExpandedInfo, setShowExpandedInfo] = useState(0);
+  const [preReqOptions, setPreReqOptions] = useState([]);
 
-  const times = [
-    "600",
-    "630",
-    "700",
-    "730",
-    "800",
-    "830",
-    "900",
-    "930",
-    "1000",
-    "1030",
-    "1100",
-    "1130",
-    "1200",
-    "1230",
-    "1300",
-    "1330",
-    "1400",
-    "1430",
-    "1500",
-    "1530",
-    "1600",
-    "1630",
-    "1700",
-    "1730",
-    "1800",
-    "1830",
-    "1900",
-    "1930",
-    "2000",
-    "2030",
-    "2100",
-    "2130",
-    "2200",
-    "2230",
-    "2300",
-    "2330",
-  ];
+  const prereqs = mergePrereqs();
+
+  useEffect(() => {
+    const expression = getPreqExpression(
+      showExpandedInfo.courseReferenceNumber
+    );
+
+    if (expression != "N/A") {
+      const regex =
+        /\(([^()]*(?:\([^()]*\))*)\s+(Or|And)\s+([^()]*(?:\([^()]*\))*)\)/g;
+
+      const variables = [];
+      let match;
+
+      while ((match = regex.exec(expression)) !== null) {
+        //if not already in variables, add it
+
+        if (!variables.includes(match[1])) {
+          variables.push(match[1]);
+        }
+        if (!variables.includes(match[3])) {
+          variables.push(match[3]);
+        }
+      }
+
+      if (variables) {
+        setPreReqOptions(
+          variables.map((variable) => {
+            //label is the text before Undergarduate or Graduate
+
+            let labelVal = variable;
+
+            if (variable.includes("Undergraduate")) {
+              labelVal = variable.replace("Undergraduate D", "");
+            }
+
+            return { value: variable, label: labelVal, isChecked: false };
+          })
+        );
+      }
+    }
+  }, [showExpandedInfo]);
+
+  useEffect(() => {
+    //determine if the preqeuisite expression is satisfied
+    let expression = getPreqExpression(showExpandedInfo.courseReferenceNumber);
+
+    if (expression != "N/A") {
+      for (const i in preReqOptions) {
+        const value = preReqOptions[i].isChecked;
+        expression = expression.replace(preReqOptions[i].value, value);
+      }
+
+      expression = expression.replace(/Or/g, "||");
+      expression = expression.replace(/And/g, "&&");
+
+      try {
+        // Use eval to evaluate the boolean expression
+        const result = eval(expression);
+
+        setPreReqStatus(result);
+
+        // The result will be a boolean value (true or false)
+      } catch (error) {
+        // Handle any parsing or evaluation errors
+        console.error(error);
+      }
+    }
+  }, [preReqOptions]);
+
+  const getPreqExpression = (crn) => {
+    const prereq = prereqs.find(
+      (prereq) => prereq.courseReferenceNumber === crn
+    );
+    if (prereq) {
+      return prereq.prerequisites;
+    } else {
+      return "No prerequisites.";
+    }
+  };
+
+  const times = [];
+
+  for (let hour = 6; hour < 23; hour++) {
+    for (let minute = 0; minute < 60; minute += 5) {
+      const formattedHour = hour.toString().padStart(2, "0");
+      const formattedMinute = minute.toString().padStart(2, "0");
+      times.push(formattedHour + formattedMinute);
+    }
+  }
+
+  console.log(times);
 
   const colors = [
     "#FFC857",
@@ -165,10 +287,22 @@ const App = () => {
     "#F9B9F2",
     "#8089b3",
     "#D64933",
-    "#bc5000",
+    "#9AC705",
   ];
 
   const days = ["M", "T", "W", "Th", "F"];
+
+  const descriptions = mergeDescriptions();
+  const getCourseDescription = (course) => {
+    const description = descriptions.find(
+      (desc) => desc.courseReferenceNumber === course
+    );
+    if (description) {
+      return description.description;
+    } else {
+      return "No description available.";
+    }
+  };
 
   const switchDayOfWeek = (courseID, day) => {
     //switch day of week of course
@@ -314,6 +448,17 @@ const App = () => {
       });
       setHoveredCourseID(null);
       setShowCalendar(true);
+      setShowExpandedInfo(0);
+    }
+  };
+  const retrieveInstructorRating = (instructor) => {
+    const instructorObject = instructors.find(
+      (inst) => inst.instructor === instructor
+    );
+    if (instructorObject && instructorObject.rating !== 0) {
+      return instructorObject.rating;
+    } else {
+      return "N/A";
     }
   };
 
@@ -349,7 +494,9 @@ const App = () => {
     });
     //add a professors RMP rating to the course
     courses.forEach((course) => {
-      course.rating = calculateCourseRating(course);
+      course.rating = calculateCourseRating(course, 0);
+      course.ratingPercent = calculateCourseRating(course, 1);
+      course.ratingDifficulty = calculateCourseRating(course, 2);
       course.courseTitle = course.courseTitle.replace(/&amp;/g, "&");
       course.courseTitle = course.courseTitle.replace(/&quot;/g, '"');
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
@@ -386,7 +533,11 @@ const App = () => {
       setShowIntro(!showIntro);
     } else if (e.key === " ") {
       e.preventDefault();
-      setOpenModal(!openModal);
+      if (showExpandedInfo !== 0) {
+        setShowExpandedInfo(0);
+      } else {
+        setOpenModal(!openModal);
+      }
     } else if (e.key === "Enter") {
       e.preventDefault();
       if (!openModal) {
@@ -400,6 +551,7 @@ const App = () => {
       e.preventDefault();
       setOpenModal(false);
       setShowIntro(false);
+      setShowExpandedInfo(0);
       inputRef.current.blur();
     } else if (e.key === "a") {
       e.preventDefault();
@@ -451,15 +603,21 @@ const App = () => {
       resetOptions();
     }
   };
-  const calculateCourseRating = (course) => {
+  const calculateCourseRating = (course, item) => {
     const instructorIndex = instructors.findIndex(
       (inst) => inst.instructor === course?.faculty[0]?.displayName
     );
 
     if (instructorIndex !== -1) {
-      return instructors[instructorIndex].rating;
+      if (item === 0) {
+        return instructors[instructorIndex].rating;
+      } else if (item === 1) {
+        return instructors[instructorIndex].percent;
+      } else if (item === 2) {
+        return instructors[instructorIndex].difficulty;
+      }
     } else {
-      return 0;
+      return "N/A";
     }
   };
 
@@ -618,6 +776,86 @@ const App = () => {
     setOpenModal(!openModal);
   };
 
+  const showInfoFunc = (course) => {
+    setShowExpandedInfo(course);
+  };
+
+  const getTimeString = (course) => {
+    let str = "";
+    let empty = false;
+    for (let i = 0; i < course.meetingsFaculty.length; i++) {
+      if (course.meetingsFaculty[i].meetingTime.beginTime == "") {
+        empty = true;
+      }
+      str +=
+        formatTimeFromMilitary(
+          course.meetingsFaculty[i].meetingTime.beginTime
+        ) +
+        " - " +
+        formatTimeFromMilitary(course.meetingsFaculty[i].meetingTime.endTime);
+      if (i < course.meetingsFaculty.length - 1) {
+        str += ", ";
+      }
+    }
+    if (str.length == 0 || str == " - " || empty) {
+      str = "TBA";
+    }
+    return str;
+  };
+
+  const formatTimeFromMilitary = (time) => {
+    if (!time) {
+      return "";
+    }
+    const hour = time.substring(0, 2);
+    const minute = time.substring(2, 4);
+    const formattedHour = hour % 12 || 12;
+    const ampm = hour < 12 ? "AM" : "PM";
+    return formattedHour + ":" + minute + " " + ampm;
+  };
+
+  const formatDaysString = (course) => {
+    let str = "";
+    for (let i = 0; i < course.meetingsFaculty.length; i++) {
+      if (course.meetingsFaculty[i].meetingTime.monday) {
+        str += "M";
+      }
+      if (course.meetingsFaculty[i].meetingTime.tuesday) {
+        str += "T";
+      }
+      if (course.meetingsFaculty[i].meetingTime.wednesday) {
+        str += "W";
+      }
+      if (course.meetingsFaculty[i].meetingTime.thursday) {
+        str += "Th";
+      }
+      if (course.meetingsFaculty[i].meetingTime.friday) {
+        str += "F";
+      }
+      if (i < course.meetingsFaculty.length - 1) {
+        str += ", ";
+      }
+    }
+
+    if (str.length == 0) {
+      str = "TBA";
+    }
+
+    return str;
+  };
+
+  const getCreditHours = (course) => {
+    if (course.creditHours != null) {
+      return course.creditHours + " Credits";
+    } else if (course.creditHourHigh != null) {
+      return course.creditHourHigh + " Credits";
+    } else if (course.creditHourLow != null) {
+      return course.creditHourLow + " Credits";
+    } else {
+      return "TBA";
+    }
+  };
+
   return (
     <div className="app dark">
       <button
@@ -627,11 +865,249 @@ const App = () => {
         <p>{showCalendar ? "Hide" : "Show"}</p>
       </button>
       {showIntro && <IntroScreen closeModal={() => setShowIntro(false)} />}
+      {showExpandedInfo !== 0 && (
+        <div className="introscreen-bg">
+          <div className="options animate__animated animate__fadeIn animate__faster">
+            <div className="options-header">
+              <h2>{showExpandedInfo.courseTitle}</h2>
+              <h6 className="keyboard-outline">ESC</h6>
+              <p>or</p>
+              <h6 className="keyboard-outline">Space</h6>
+            </div>
+            <p className="app-settings-subtitle">
+              {showExpandedInfo.subject}-{showExpandedInfo.courseNumber}
+            </p>
+            <h6 className="options-expanded-header">Basic Info</h6>
+            <div className="course-icons-expanded">
+              <div className="course-icon">
+                <img src="/icons/instructor.svg" alt="instructor" />
+
+                <a
+                  target="_blank"
+                  href={
+                    "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
+                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
+                  }>
+                  {showExpandedInfo.faculty.length > 0
+                    ? showExpandedInfo.faculty[0].displayName
+                    : "Not Available"}
+                </a>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/seats.svg" alt="Seats" />
+
+                <p>
+                  <span className="large-text">
+                    {showExpandedInfo.seatsAvailable}
+                  </span>
+                  <span className="small-text">
+                    {"/" + showExpandedInfo.maximumEnrollment}{" "}
+                  </span>
+                  Left
+                </p>
+                <p>
+                  <span className="large-text">
+                    {showExpandedInfo.waitAvailable}
+                  </span>
+                  <span className="small-text">
+                    {"/" + showExpandedInfo.waitCapacity}{" "}
+                  </span>
+                  WL
+                </p>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/location.svg" alt="location" />
+                <p>
+                  {showExpandedInfo.meetingsFaculty.length > 0 &&
+                  showExpandedInfo.meetingsFaculty[0].meetingTime.building
+                    ? showExpandedInfo.meetingsFaculty[0].meetingTime.building +
+                      "-" +
+                      showExpandedInfo.meetingsFaculty[0].meetingTime.room
+                    : "TBA"}
+                </p>
+              </div>
+
+              <div className="course-icon">
+                <img src="/icons/star.svg" alt="rating" />
+                <a
+                  target="_blank"
+                  href={
+                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
+                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
+                  }>
+                  {showExpandedInfo.faculty.length > 0
+                    ? showExpandedInfo.rating
+                    : "N/A"}
+
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.rating >= 4 && (
+                      <div className="color-circle-green"></div>
+                    )}
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.rating < 4 &&
+                    showExpandedInfo.rating >= 3 && (
+                      <div className="color-circle-yellow"></div>
+                    )}
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.rating < 3 && (
+                      <div className="color-circle-red"></div>
+                    )}
+                </a>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/star.svg" alt="rating" />
+                <a
+                  target="_blank"
+                  href={
+                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
+                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
+                  }>
+                  {showExpandedInfo.faculty.length > 0
+                    ? showExpandedInfo.ratingDifficulty
+                    : "N/A"}
+
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.ratingDifficulty < 2.5 && (
+                      <div className="color-circle-green"></div>
+                    )}
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.rating < 4 &&
+                    showExpandedInfo.ratingDifficulty >= 2.5 && (
+                      <div className="color-circle-yellow"></div>
+                    )}
+                  {showExpandedInfo.rating !== "N/A" &&
+                    showExpandedInfo.ratingDifficulty > 4 && (
+                      <div className="color-circle-red"></div>
+                    )}
+                </a>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/star.svg" alt="rating" />
+                <a
+                  target="_blank"
+                  href={
+                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
+                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
+                  }>
+                  {showExpandedInfo.faculty.length > 0
+                    ? showExpandedInfo.ratingPercent + " Would Take Again"
+                    : "N/A"}
+                </a>
+              </div>
+
+              <div className="course-icon">
+                <img src="/icons/time.svg" alt="time" />
+                <p>{getTimeString(showExpandedInfo)}</p>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/days.svg" alt="Days" />
+                <p>{formatDaysString(showExpandedInfo)}</p>
+              </div>
+              <div className="course-icon">
+                <img src="/icons/fast.svg" alt="time" />
+                <p>{getCreditHours(showExpandedInfo)}</p>
+              </div>
+            </div>
+            <div className="course-attributes">
+              {showExpandedInfo.sectionAttributes.length > 0 &&
+                showExpandedInfo.sectionAttributes.map((attribute) => {
+                  if (attribute.code != "MEAN") {
+                    return (
+                      <p className="course-attribute">
+                        {attribute.description}
+                      </p>
+                    );
+                  }
+                })}
+            </div>
+            <h6 className="options-expanded-header">Course Description</h6>
+            <p>
+              {getCourseDescription(showExpandedInfo.courseReferenceNumber)}
+            </p>
+            <h6 className="options-expanded-header">Prerequisites</h6>
+            <p>{getPreqExpression(showExpandedInfo.courseReferenceNumber)}</p>
+            {preReqOptions.length > 0 && (
+              <div>
+                <h6 className="options-expanded-header">
+                  Prerequisites Checker
+                </h6>
+                <p>
+                  We get it can be confusing to read that. Select which classes
+                  you've already taken to see if you can take this one.
+                </p>
+              </div>
+            )}
+            {preReqOptions.length > 0 && (
+              <div className="options-preq-selectors">
+                {preReqOptions.length > 0 ? (
+                  preReqOptions.map((option) => {
+                    return (
+                      <div className="options-preq-selector">
+                        <label class="custom-checkbox-container">
+                          <input
+                            type="checkbox"
+                            id={option.value}
+                            name={option.value}
+                            value={option.isChecked}
+                            onChange={() => {
+                              const newOptions = preReqOptions.map((o) => {
+                                if (o.value === option.value) {
+                                  return {
+                                    ...o,
+                                    isChecked: !o.isChecked,
+                                  };
+                                } else {
+                                  return o;
+                                }
+                              });
+                              setPreReqOptions(newOptions);
+                            }}
+                          />
+                          <span class="checkmark"></span>
+                        </label>
+
+                        <p>{option.label}</p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p>No Prerequisites</p>
+                )}
+              </div>
+            )}
+
+            {preReqOptions.length > 0 && (
+              <div className="options-preq-checker-status">
+                <p className="options-preq-checker-label">Status:</p>
+                <span className={!preReqStatus ? "red-bg" : "green-bg"}>
+                  <p className="options-expanded-status">
+                    {preReqStatus ? "Eligble!" : "Ineligble"}
+                  </p>
+                  {preReqStatus ? <FaCheck /> : <FaX />}
+                </span>
+              </div>
+            )}
+
+            <div className="options-expanded-buttons">
+              <button
+                className="options-expanded-button-close"
+                onClick={() => setShowExpandedInfo(0)}>
+                Close
+              </button>
+              <button
+                className="options-expanded-button-add"
+                onClick={() => addCourse(showExpandedInfo.id)}>
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {openModal && (
         <div className="introscreen-bg">
           <div className="options animate__animated animate__fadeIn animate__faster">
             <div className="options-header">
-              <h2>App Settings</h2>
+              <h2>Search Filters</h2>
               <h6 className="keyboard-outline">ESC</h6>
               <p>or</p>
               <h6 className="keyboard-outline">Space</h6>
@@ -861,10 +1337,11 @@ const App = () => {
               <Course
                 course={course}
                 key={course.id}
+                showInfo={showInfoFunc}
+                showInfoToggle={showCourseInfo}
                 func={() => addCourse(course.id)}
                 hoverFunc={() => setHoveredCourseID(course.id)}
                 unhoverFunc={() => setHoveredCourseID(null)}
-                showInfo={showCourseInfo}
                 showAttributes={showCourseAttributes}
               />
             ))}
@@ -904,7 +1381,7 @@ const App = () => {
               <div className="calendar-day slot-label-column">
                 <p>.</p>
                 {times.map((time, index) => {
-                  if (index % 2 === 0) {
+                  if (index % 12 === 0) {
                     return (
                       <div className="calendar-slot slot-label border-top">
                         {(Number(time) / 100) % 12 || 12}
@@ -959,7 +1436,11 @@ const App = () => {
                     if (hover) {
                       return (
                         <div
-                          className="calendar-slot slot-filled"
+                          className={
+                            index % 12 === 0
+                              ? "calendar-slot slot-filled  border-top"
+                              : "calendar-slot slot-filled"
+                          }
                           style={{
                             backgroundColor: "#e1e1e1",
                           }}></div>
@@ -968,7 +1449,7 @@ const App = () => {
                       return (
                         <div
                           className={
-                            index % 2 === 0
+                            index % 12 === 0
                               ? "calendar-slot slot-empty  border-top"
                               : "calendar-slot slot-empty"
                           }></div>
@@ -976,11 +1457,16 @@ const App = () => {
                     } else {
                       return (
                         <div
-                          className="calendar-slot slot-filled"
+                          className={
+                            index % 12 === 0
+                              ? "calendar-slot slot-filled  border-top"
+                              : "calendar-slot slot-filled"
+                          }
                           style={{
                             backgroundColor: getBackgroundColor(
                               coursesAtTime[0]
                             ),
+                            borderColor: getBackgroundColor(coursesAtTime[0]),
                           }}>
                           {" "}
                           <div className="calendar-tooltip">
