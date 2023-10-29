@@ -428,10 +428,6 @@ text-align: center;
   transition: .3s all;
 }
 
-.course-button svg, .course-button-more svg{
-  height: 122px;
-  width: 22px;
-}
 
 
 .course:hover .course-button, .course:hover .course-button-more{
@@ -1406,7 +1402,6 @@ padding: 0px 15px;
 
   .course-button, .course-button-more {
     opacity: 1;
-    font-size: 24px;
   }
 
 .empty-calendar{
