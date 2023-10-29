@@ -618,7 +618,7 @@ const App = () => {
         return instructors[instructorIndex].difficulty;
       }
     } else {
-      return "N/A";
+      return 0;
     }
   };
 
