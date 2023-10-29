@@ -503,6 +503,7 @@ const App = () => {
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
       course.courseTitle = course.courseTitle.replace("&#39;", "'");
     });
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
   }, []);
 
   const resetOptions = () => {
@@ -1332,18 +1333,32 @@ const App = () => {
                 <p>Loading more classes, hang tight.</p>
               </div>
             }>
-            {filteredCourses.slice(0, records).map((course, index) => (
-              <Course
-                course={course}
-                key={course.id}
-                showInfo={showInfoFunc}
-                showInfoToggle={showCourseInfo}
-                func={() => addCourse(course.id)}
-                hoverFunc={() => setHoveredCourseID(course.id)}
-                unhoverFunc={() => setHoveredCourseID(null)}
-                showAttributes={showCourseAttributes}
-              />
-            ))}
+            {filteredCourses.slice(0, records).map((course, index) => {
+              if (index % 12 == 0) {
+                return (
+                  <ins
+                    class="adsbygoogle"
+                    style={{ display: "block" }}
+                    data-ad-client="ca-pub-2810278894704716"
+                    data-ad-slot="5805874373"
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"></ins>
+                );
+              } else {
+                return (
+                  <Course
+                    course={course}
+                    key={course.id}
+                    showInfo={showInfoFunc}
+                    showInfoToggle={showCourseInfo}
+                    func={() => addCourse(course.id)}
+                    hoverFunc={() => setHoveredCourseID(course.id)}
+                    unhoverFunc={() => setHoveredCourseID(null)}
+                    showAttributes={showCourseAttributes}
+                  />
+                );
+              }
+            })}
           </InfiniteScroll>
           {filteredCourses.length === 0 && (
             <div className="no-results">
