@@ -141,6 +141,7 @@ const App = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
   const [preReqStatus, setPreReqStatus] = useState(false);
+  const [adsFilled, setAdsFilled] = useState(false);
 
   const [calendars, setCalendars] = useState(() => {
     const saved = localStorage.getItem("calendars");
@@ -503,7 +504,10 @@ const App = () => {
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
       course.courseTitle = course.courseTitle.replace("&#39;", "'");
     });
-    (window.adsbygoogle = window.adsbygoogle || []).push({});
+    if (!adsFilled) {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      setAdsFilled(true);
+    }
   }, []);
 
   const resetOptions = () => {
