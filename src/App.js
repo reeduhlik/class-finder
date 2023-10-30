@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 import instructors from "./instructors";
+import AdComponent from "./AdComponent";
 import Course from "./Course";
 import CalendarCourse from "./CalendarCourse";
 import "./App.css";
@@ -504,10 +505,6 @@ const App = () => {
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
       course.courseTitle = course.courseTitle.replace("&#39;", "'");
     });
-    if (!adsFilled) {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      setAdsFilled(true);
-    }
   }, []);
 
   const resetOptions = () => {
@@ -1339,17 +1336,7 @@ const App = () => {
             }>
             {filteredCourses.slice(0, records).map((course, index) => {
               if (index % 12 == 11) {
-                return (
-                  <div>
-                    <ins
-                      className="adsbygoogle"
-                      style={{ display: "block" }}
-                      data-ad-client="ca-pub-2810278894704716"
-                      data-ad-slot="5805874373"
-                      data-ad-format="auto"
-                      data-full-width-responsive="true"></ins>
-                  </div>
-                );
+                return <AdComponent />;
               } else {
                 return (
                   <Course
