@@ -1335,8 +1335,19 @@ const App = () => {
               </div>
             }>
             {filteredCourses.slice(0, records).map((course, index) => {
-              if (index % 12 == 11) {
-                return <AdComponent />;
+              if (index % 13 == 8) {
+                return (
+                  <Course
+                    course={course}
+                    key={course.id}
+                    showInfo={showInfoFunc}
+                    showInfoToggle={showCourseInfo}
+                    func={() => addCourse(course.id)}
+                    hoverFunc={() => setHoveredCourseID(course.id)}
+                    unhoverFunc={() => setHoveredCourseID(null)}
+                    showAttributes={showCourseAttributes}
+                  />
+                );
               } else {
                 return (
                   <Course
