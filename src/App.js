@@ -1341,7 +1341,6 @@ const App = () => {
               if (index % 12 == 11) {
                 return (
                   <div>
-                    <h1>Test Ad</h1>
                     <ins
                       className="adsbygoogle"
                       style={{ display: "block" }}
