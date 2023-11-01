@@ -15,7 +15,7 @@ from selenium.webdriver.chrome.service import Service
 
 service = Service()
 options = webdriver.ChromeOptions()
-options.headless = False
+options.headless = True
 driver = webdriver.Chrome(service=service, options=options)
 
 
