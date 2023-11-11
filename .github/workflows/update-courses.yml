@@ -21,6 +21,9 @@ jobs:
       run: git checkout main
     - name: Run a scraping script
       run: python3 ./src/course_scraper.py
+      env:
+        GEORGETOWN_USERNAME: ${{ secrets.GEORGETOWN_USERNAME }}
+        GEORGETOWN_PASSWORD: ${{ secrets.GEORGETOWN_PASSWORD }}
     - name: Committing changed files back to Github
       run: git config --global user.name 'Reed Uhlik'
     - name: Config property

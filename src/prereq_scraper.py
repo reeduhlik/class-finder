@@ -6,10 +6,6 @@ import requests
 count = 1
 url = 'https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/getSectionPrerequisites'
 
-
-
-
-
 for i in range(0, 12):
 
     descriptions = []
@@ -93,7 +89,7 @@ for i in range(0, 12):
 
 
     #convert descriptions to a json object
-    with open(f'./src/prereqs{i}.json', 'w') as f:
+    with open(f'./src/prereqs/prereqs{i}.json', 'w') as f:
         json.dump(descriptions, f)
 
 

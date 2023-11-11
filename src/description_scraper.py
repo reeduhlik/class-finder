@@ -53,7 +53,7 @@ for i in range(1, 12):
 
 
     #convert descriptions to a json object
-    with open(f'./src/descriptions{i}.json', 'w') as f:
+    with open(f'./src/descriptions/descriptions{i}.json', 'w') as f:
         json.dump(descriptions, f)
 
 

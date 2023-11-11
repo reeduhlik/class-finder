@@ -1,154 +1,96 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import instructors from "./instructors";
-import AdComponent from "./AdComponent";
-import Course from "./Course";
-import CalendarCourse from "./CalendarCourse";
-import "./App.css";
-import page0 from "./page0.json";
-import page1 from "./page1.json";
-import page2 from "./page2.json";
-import page3 from "./page3.json";
-import page4 from "./page4.json";
-import page5 from "./page5.json";
-import page6 from "./page6.json";
-import page7 from "./page7.json";
-import page8 from "./page8.json";
-import page9 from "./page9.json";
-import page10 from "./page10.json";
-import page11 from "./page11.json";
-
-import descriptions0 from "./descriptions0.json";
-import descriptions1 from "./descriptions1.json";
-import descriptions2 from "./descriptions2.json";
-import descriptions3 from "./descriptions3.json";
-import descriptions4 from "./descriptions4.json";
-import descriptions5 from "./descriptions5.json";
-import descriptions6 from "./descriptions6.json";
-import descriptions7 from "./descriptions7.json";
-import descriptions8 from "./descriptions8.json";
-import descriptions9 from "./descriptions9.json";
-import descriptions10 from "./descriptions10.json";
-import descriptions11 from "./descriptions11.json";
-
-import prereqs0 from "./prereqs0.json";
-import prereqs1 from "./prereqs1.json";
-import prereqs2 from "./prereqs2.json";
-import prereqs3 from "./prereqs3.json";
-import prereqs4 from "./prereqs4.json";
-import prereqs5 from "./prereqs5.json";
-import prereqs6 from "./prereqs6.json";
-import prereqs7 from "./prereqs7.json";
-import prereqs8 from "./prereqs8.json";
-import prereqs9 from "./prereqs9.json";
-import prereqs10 from "./prereqs10.json";
-import prereqs11 from "./prereqs11.json";
 
 import InfiniteScroll from "react-infinite-scroll-component";
 import { HashLoader } from "react-spinners";
 import { inject } from "@vercel/analytics";
-//import stuff to do animation on scroll
 import "animate.css/animate.min.css";
-import { AnimationOnScroll } from "react-animation-on-scroll";
-import {
-  FaSliders,
-  FaRegCalendar,
-  FaMagnifyingGlass,
-  FaX,
-  FaCheck,
-  FaExpand,
-  FaCopy,
-} from "react-icons/fa6";
-import Toggle from "react-toggle";
-import Select from "react-select";
-import IntroScreen from "./IntroScreen";
+import { FaSliders, FaRegCalendar, FaMagnifyingGlass } from "react-icons/fa6";
 import useEventListener from "@use-it/event-listener";
 
-const mergePages = () => {
-  const data = page0.data.concat(
-    page1.data,
-    page2.data,
-    page3.data,
-    page4.data,
-    page5.data,
-    page6.data,
-    page7.data,
-    page8.data,
-    page9.data,
-    page10.data,
-    page11.data
-  );
+import { courseData, descriptionData, prereqData } from "./courseData";
+import instructors from "./instructors";
 
-  //filter out all null courses
-  const newData = data.filter((course) => course != null);
+import "./App.css";
 
-  return newData;
+import ExpandedView from "./ExpandedView";
+import Settings from "./Settings";
+import CalendarView from "./CalendarView";
+import Course from "./Course";
+import IntroScreen from "./IntroScreen";
 
-  //write certain fields to csv file
-};
+//colors used in the calendar view for each course
+const colors = [
+  "#FFC857",
+  "#3ABECF",
+  "#F9B9F2",
+  "#8089b3",
+  "#D64933",
+  "#9AC705",
+];
 
-const mergeDescriptions = () => {
-  const data = descriptions0.concat(
-    descriptions1,
-    descriptions2,
-    descriptions3,
-    descriptions4,
-    descriptions5,
-    descriptions6,
-    descriptions7,
-    descriptions8,
-    descriptions9,
-    descriptions10,
-    descriptions11
-  );
+const days = ["M", "T", "W", "Th", "F"];
 
-  return data;
-};
+//times used in the calendar view
+const times = [];
 
-const mergePrereqs = () => {
-  const data = prereqs0.concat(
-    prereqs1,
-    prereqs2,
-    prereqs3,
-    prereqs4,
-    prereqs5,
-    prereqs6,
-    prereqs7,
-    prereqs8,
-    prereqs9,
-    prereqs10,
-    prereqs11
-  );
+//options for the time filter
+const timeOptions = [];
 
-  return data;
-};
+//generate all times from 6:00 AM to 11:55 PM in 5 minute intervals
+for (let hour = 6; hour < 23; hour++) {
+  for (let minute = 0; minute < 60; minute += 5) {
+    const formattedHour = hour.toString().padStart(2, "0");
+    const formattedMinute = minute.toString().padStart(2, "0");
+    times.push(formattedHour + formattedMinute);
+
+    if (formattedMinute % 15 === 0) {
+      timeOptions.push({
+        value: Number(formattedHour + formattedMinute),
+        label:
+          formattedHour +
+          ":" +
+          formattedMinute +
+          " " +
+          (hour < 12 ? "AM" : "PM"),
+      });
+    }
+  }
+}
 
 const App = () => {
+  //inject vercel analytics
   inject();
-  const formatMilitaryTime = (time) => {
-    if (!time) {
-      return "";
-    }
-    const hour = time.substring(0, 2);
-    const minute = time.substring(2, 4);
-    const formattedHour = hour % 12 || 12;
-    const ampm = hour < 12 ? "AM" : "PM";
-    return formattedHour + ":" + minute + " " + ampm;
-  };
-  const courses = mergePages();
+
+  //get data from courseData.js
+  const courses = courseData;
+  const prereqs = prereqData;
+  const descriptions = descriptionData;
+
   const inputRef = useRef(null);
   const attributesRef = useRef(null);
 
+  //options for user to toggle on and off when looking at courses
+  const [showCourseAttributes, setShowCourseAttributes] = useState(true);
+  const [showCourseInfo, setShowCourseInfo] = useState(true);
+
+  //default show the intro modal
   const [showIntro, setShowIntro] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [preReqStatus, setPreReqStatus] = useState(false);
-  const [adsFilled, setAdsFilled] = useState(false);
+  const [openSettingsModal, setOpenSettingsModal] = useState(false);
+  const [expandedCourse, setExpandedCourse] = useState(0);
 
+  //reflects if the user is eligble for a class based on the pre-requisites selected
+
+  //loads the users calendars from local storage
   const [calendars, setCalendars] = useState(() => {
-    const saved = localStorage.getItem("calendars");
-    const initialValue = JSON.parse(saved);
-    if (initialValue && Object.keys(initialValue)?.length !== 3) {
-      return [
+    const localCalendars = localStorage.getItem("calendars");
+
+    const savedCalendars = JSON.parse(localCalendars);
+
+    //if there are no saved calendars, create 3 default ones
+    return (
+      savedCalendars || [
         {
           name: "Plan #1",
           courses: [],
@@ -161,106 +103,38 @@ const App = () => {
           name: "Plan #3",
           courses: [],
         },
-      ];
-    } else {
-      return (
-        initialValue || [
-          {
-            name: "Plan #1",
-            courses: [],
-          },
-          {
-            name: "Plan #2",
-            courses: [],
-          },
-          {
-            name: "Plan #3",
-            courses: [],
-          },
-        ]
-      );
-    }
-  });
-  const [activeCalendar, setActiveCalendar] = useState(0);
-
-  const [hoveredCourseID, setHoveredCourseID] = useState(null);
-  const [filteredCourses, setFilteredCourses] = useState([]);
-  const [attributeOptions, setAttributeOptions] = useState([]);
-  const [showCourseAttributes, setShowCourseAttributes] = useState(true);
-  const [showCourseInfo, setShowCourseInfo] = useState(true);
-  const [showExpandedInfo, setShowExpandedInfo] = useState(0);
-  const [preReqOptions, setPreReqOptions] = useState([]);
-
-  const prereqs = mergePrereqs();
-
-  useEffect(() => {
-    const expression = getPreqExpression(
-      showExpandedInfo.courseReferenceNumber
+      ]
     );
+  });
 
-    if (expression != "N/A") {
-      const regex =
-        /\(([^()]*(?:\([^()]*\))*)\s+(Or|And)\s+([^()]*(?:\([^()]*\))*)\)/g;
+  const [activeCalendar, setActiveCalendar] = useState(0);
+  const [hoveredCourseID, setHoveredCourseID] = useState(null);
 
-      const variables = [];
-      let match;
+  const [filteredCourses, setFilteredCourses] = useState([]);
 
-      while ((match = regex.exec(expression)) !== null) {
-        //if not already in variables, add it
+  //determined by traversing through all courses and finding unique attributes
+  const [attributeOptions, setAttributeOptions] = useState([]);
 
-        if (!variables.includes(match[1])) {
-          variables.push(match[1]);
-        }
-        if (!variables.includes(match[3])) {
-          variables.push(match[3]);
-        }
-      }
+  //updates to show the different pre-requisites for the course currently expanded
+  const [preReqOptions, setPreReqOptions] = useState([]);
+  const [preReqStatus, setPreReqStatus] = useState(false);
 
-      if (variables) {
-        setPreReqOptions(
-          variables.map((variable) => {
-            //label is the text before Undergarduate or Graduate
+  //Variables that a user can filter by
+  const [searchTerm, setSearchTerm] = useState("");
+  const [onlyOpen, setOnlyOpen] = useState(false);
+  const [onlyGrad, setOnlyGrad] = useState(false);
+  const [onlyGU, setOnlyGU] = useState(true);
+  const [noFriday, setNoFriday] = useState(false);
+  const [filterByRating, setFilterByRating] = useState(false);
+  const [filterConflicts, setFilterConflicts] = useState(true);
+  const [attributesToFilter, setAttributesToFilter] = useState([]);
+  const [startTime, setStartTime] = useState(timeOptions[0]);
+  const [endTime, setEndTime] = useState(timeOptions[timeOptions.length - 1]);
 
-            let labelVal = variable;
+  const [numberOfCoursesRendered, setNumberOfCoursesRendered] = useState(12);
+  const [hasMore, setHasMore] = useState(true);
 
-            if (variable.includes("Undergraduate")) {
-              labelVal = variable.replace("Undergraduate D", "");
-            }
-
-            return { value: variable, label: labelVal, isChecked: false };
-          })
-        );
-      }
-    }
-  }, [showExpandedInfo]);
-
-  useEffect(() => {
-    //determine if the preqeuisite expression is satisfied
-    let expression = getPreqExpression(showExpandedInfo.courseReferenceNumber);
-
-    if (expression != "N/A") {
-      for (const i in preReqOptions) {
-        const value = preReqOptions[i].isChecked;
-        expression = expression.replace(preReqOptions[i].value, value);
-      }
-
-      expression = expression.replace(/Or/g, "||");
-      expression = expression.replace(/And/g, "&&");
-
-      try {
-        // Use eval to evaluate the boolean expression
-        const result = eval(expression);
-
-        setPreReqStatus(result);
-
-        // The result will be a boolean value (true or false)
-      } catch (error) {
-        // Handle any parsing or evaluation errors
-        console.error(error);
-      }
-    }
-  }, [preReqOptions]);
-
+  //returns the pre-requisite expression for a course from its crn
   const getPreqExpression = (crn) => {
     const prereq = prereqs.find(
       (prereq) => prereq.courseReferenceNumber === crn
@@ -272,43 +146,34 @@ const App = () => {
     }
   };
 
-  const times = [];
-
-  for (let hour = 6; hour < 23; hour++) {
-    for (let minute = 0; minute < 60; minute += 5) {
-      const formattedHour = hour.toString().padStart(2, "0");
-      const formattedMinute = minute.toString().padStart(2, "0");
-      times.push(formattedHour + formattedMinute);
-    }
-  }
-
-  console.log(times);
-
-  const colors = [
-    "#FFC857",
-    "#3ABECF",
-    "#F9B9F2",
-    "#8089b3",
-    "#D64933",
-    "#9AC705",
-  ];
-
-  const days = ["M", "T", "W", "Th", "F"];
-
-  const descriptions = mergeDescriptions();
-  const getCourseDescription = (course) => {
+  //returns course description based on course reference number
+  const getCourseDescription = (crn) => {
     const description = descriptions.find(
-      (desc) => desc.courseReferenceNumber === course
+      (desc) => desc.courseReferenceNumber === crn
     );
-    if (description) {
-      return description.description;
-    } else {
-      return "No description available.";
-    }
+    return description?.description || "No description available.";
   };
 
+  //calculates the total number of credits in the active calendar
+  const getCreditNumber = () => {
+    let credits = 0;
+
+    calendars[activeCalendar]?.courses.forEach((courseID) => {
+      const course = findCourseByID(courseID);
+
+      if (course.creditHours != null) {
+        credits += course.creditHours;
+      } else if (course.creditHourHigh != null) {
+        credits += course.creditHourHigh;
+      } else if (course.creditHourLow != null) {
+        credits += course.creditHourLow;
+      }
+    });
+    return credits + " Credits";
+  };
+
+  //returns the meeting time of a course on a specific day
   const switchDayOfWeek = (courseID, day) => {
-    //switch day of week of course
     const course = findCourseByID(courseID);
 
     if (day === "M") {
@@ -319,13 +184,27 @@ const App = () => {
       return course.meetingsFaculty[0].meetingTime.wednesday;
     } else if (day === "Th") {
       return course.meetingsFaculty[0].meetingTime.thursday;
-    } else if (day === "F") {
+    } else {
       return course.meetingsFaculty[0].meetingTime.friday;
     }
   };
 
+  //returns course object based on course ID
+  const findCourseByID = (id) => {
+    return courses.find((course) => course.id === id);
+  };
+
+  //returns background color of course in active calendar
+  const getBackgroundColor = (course) => {
+    //find index of course in selected courses
+    const index = calendars[activeCalendar].courses.findIndex(
+      (c) => c === course
+    );
+    return colors[index % colors.length];
+  };
+
+  //copy all crns of selected courses to clipboard
   const onCopyClick = () => {
-    //copy all crns of selected courses to clipboard
     let crns = "";
     crns += "Your Course CRNs:\n\n";
 
@@ -343,103 +222,18 @@ const App = () => {
     navigator.clipboard.writeText(crns);
   };
 
-  const getCreditNumber = () => {
-    //add credit numbers together of selected courses
-    let credits = 0;
-
-    calendars[activeCalendar]?.courses.forEach((courseID) => {
-      const course = findCourseByID(courseID);
-
-      if (course.creditHours != null) {
-        credits += course.creditHours;
-      } else if (course.creditHourHigh != null) {
-        credits += course.creditHourHigh;
-      } else if (course.creditHourLow != null) {
-        credits += course.creditHourLow;
-      }
-    });
-    return credits + " Credits";
-  };
-
-  const [timeOptions, setTimeOptions] = useState([
-    { value: 500, label: "5:00 AM" },
-    { value: 530, label: "5:30 AM" },
-    { value: 600, label: "6:00 AM" },
-    { value: 630, label: "6:30 AM" },
-    { value: 700, label: "7:00 AM" },
-    { value: 730, label: "7:30 AM" },
-
-    { value: 800, label: "8:00 AM" },
-    { value: 830, label: "8:30 AM" },
-    { value: 900, label: "9:00 AM" },
-    { value: 930, label: "9:30 AM" },
-    { value: 1000, label: "10:00 AM" },
-    { value: 1030, label: "10:30 AM" },
-    { value: 1100, label: "11:00 AM" },
-    { value: 1130, label: "11:30 AM" },
-    { value: 1200, label: "12:00 PM" },
-    { value: 1230, label: "12:30 PM" },
-    { value: 1300, label: "1:00 PM" },
-    { value: 1330, label: "1:30 PM" },
-    { value: 1400, label: "2:00 PM" },
-    { value: 1430, label: "2:30 PM" },
-    { value: 1500, label: "3:00 PM" },
-    { value: 1530, label: "3:30 PM" },
-    { value: 1600, label: "4:00 PM" },
-    { value: 1630, label: "4:30 PM" },
-    { value: 1700, label: "5:00 PM" },
-    { value: 1730, label: "5:30 PM" },
-    { value: 1800, label: "6:00 PM" },
-    { value: 1830, label: "6:30 PM" },
-    { value: 1900, label: "7:00 PM" },
-    { value: 1930, label: "7:30 PM" },
-    { value: 2000, label: "8:00 PM" },
-    { value: 2030, label: "8:30 PM" },
-    { value: 2100, label: "9:00 PM" },
-    { value: 2130, label: "9:30 PM" },
-    { value: 2200, label: "10:00 PM" },
-    { value: 2230, label: "10:30 PM" },
-    { value: 2300, label: "11:00 PM" },
-    { value: 2330, label: "11:30 PM" },
-  ]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [attributes, setAttributes] = useState([]);
-  const [filterConflicts, setFilterConflicts] = useState(true);
-
-  const [onlyOpen, setOnlyOpen] = useState(false);
-  const [onlyGrad, setOnlyGrad] = useState(false);
-  const [onlyGU, setOnlyGU] = useState(true);
-  const [noFriday, setNoFriday] = useState(false);
-
-  const [openModal, setOpenModal] = useState(false);
-  const [filterByRating, setFilterByRating] = useState(false);
-
-  const [records, setrecords] = useState(12);
-  const [hasMore, setHasMore] = useState(true);
-
-  const [startTime, setStartTime] = useState(timeOptions[0]);
-  const [endTime, setEndTime] = useState(timeOptions[timeOptions.length - 1]);
-
+  //when the user gets to the bottom of the infinite scroll, load more courses
   const loadMore = () => {
-    if (records > filteredCourses.length) {
+    if (numberOfCoursesRendered > filteredCourses.length) {
       setHasMore(false);
     } else {
       setTimeout(() => {
-        setrecords(records + 6);
+        setNumberOfCoursesRendered(numberOfCoursesRendered + 6);
       }, 1000);
     }
   };
 
-  const addCalendar = (calendar) => {
-    setCalendars({
-      ...calendars,
-      [calendar]: {
-        name: `Calendar #${calendar + 1}`,
-        courses: [],
-      },
-    });
-  };
-
+  //adds the selected course to the active calendar
   const addCourse = (course) => {
     if (!calendars[activeCalendar].courses.includes(course)) {
       setCalendars({
@@ -451,20 +245,11 @@ const App = () => {
       });
       setHoveredCourseID(null);
       setShowCalendar(true);
-      setShowExpandedInfo(0);
-    }
-  };
-  const retrieveInstructorRating = (instructor) => {
-    const instructorObject = instructors.find(
-      (inst) => inst.instructor === instructor
-    );
-    if (instructorObject && instructorObject.rating !== 0) {
-      return instructorObject.rating;
-    } else {
-      return "N/A";
+      setExpandedCourse(0);
     }
   };
 
+  //removes the selected course from the active calendar
   const removeCourse = (course) => {
     setCalendars({
       ...calendars,
@@ -475,40 +260,109 @@ const App = () => {
     });
   };
 
+  //when expanded course changes, update the pre-requisite options
+  useEffect(() => {
+    const expression = getPreqExpression(expandedCourse.courseReferenceNumber);
+
+    if (expression !== "N/A") {
+      const regex =
+        /\(([^()]*(?:\([^()]*\))*)\s+(Or|And)\s+([^()]*(?:\([^()]*\))*)\)/g;
+
+      const elementsInRegEx = [];
+      let match;
+
+      while ((match = regex.exec(expression)) !== null) {
+        //if not already in the array, add it
+
+        if (!elementsInRegEx.includes(match[1])) {
+          elementsInRegEx.push(match[1]);
+        }
+        if (!elementsInRegEx.includes(match[3])) {
+          elementsInRegEx.push(match[3]);
+        }
+      }
+
+      if (elementsInRegEx.length > 0) {
+        setPreReqOptions(
+          elementsInRegEx.map((c) => {
+            //label is the text before Undergarduate or Graduate
+
+            return { value: c, label: c, isChecked: false };
+          })
+        );
+      }
+    }
+  }, [expandedCourse]);
+
+  //updates the pre-requisite status when the user toggles a pre-requisite
+  useEffect(() => {
+    let expression = getPreqExpression(expandedCourse.courseReferenceNumber);
+
+    if (expression !== "N/A") {
+      for (const i in preReqOptions) {
+        const value = preReqOptions[i].isChecked;
+        expression = expression.replace(preReqOptions[i].value, value);
+      }
+
+      expression = expression.replace(/Or/g, "||");
+      expression = expression.replace(/And/g, "&&");
+
+      try {
+        // Use eval to evaluate the boolean expression
+        const result = eval(expression);
+
+        setPreReqStatus(result);
+
+        // The result will be a boolean value (true or false)
+      } catch (error) {
+        // Handle any parsing or evaluation errors
+        setPreReqStatus(false);
+      }
+    }
+  }, [preReqOptions]);
+
   //update calendar lcoal storage when calendar changes
   useEffect(() => {
     localStorage.setItem("calendars", JSON.stringify(calendars));
   }, [calendars]);
 
+  //on page load, generate all possible attribute options from the courses and merge the instructor data into the course object
   useEffect(() => {
-    //filter all null couress
-
     const usedAttributes = [];
+
     courses.map((course) => {
       course.sectionAttributes.map((attribute) => {
         if (!usedAttributes.includes(attribute.code)) {
-          attributeOptions.push({
-            value: attribute.code,
-            label: attribute.description,
-          });
+          //add attribute to attribute options
+          setAttributeOptions((attributeOptions) => [
+            ...attributeOptions,
+            { value: attribute.code, label: attribute.description },
+          ]);
           usedAttributes.push(attribute.code);
         }
       });
     });
-    //add a professors RMP rating to the course
+
+    //clean up course data
     courses.forEach((course) => {
+      //add RMP rating to course object
       course.rating = calculateCourseRating(course, 0);
       course.ratingPercent = calculateCourseRating(course, 1);
       course.ratingDifficulty = calculateCourseRating(course, 2);
+
+      //format course title
       course.courseTitle = course.courseTitle.replace(/&amp;/g, "&");
       course.courseTitle = course.courseTitle.replace(/&quot;/g, '"');
       course.courseTitle = course.courseTitle.replace(/&apos;/g, "'");
       course.courseTitle = course.courseTitle.replace("&#39;", "'");
     });
-  }, []);
 
+    console.log(calendars);
+  }, [courses]);
+
+  //when a user clicks TAB, reset all filters
   const resetOptions = () => {
-    setAttributes([]);
+    setAttributesToFilter([]);
     setOnlyOpen(false);
     setOnlyGrad(false);
     setOnlyGU(false);
@@ -519,16 +373,35 @@ const App = () => {
     setSearchTerm("");
   };
 
-  const handleKeyDown = async (e) => {
-    //if either inputs are focused, don't do anything
+  //find index of course in instructor array based on instructor name
+  const calculateCourseRating = (course, item) => {
+    const instructorIndex = instructors.findIndex(
+      (inst) => inst.instructor === course?.faculty[0]?.displayName
+    );
 
+    if (instructorIndex !== -1) {
+      if (item === 0) {
+        return instructors[instructorIndex].rating;
+      } else if (item === 1) {
+        return instructors[instructorIndex].percent;
+      } else {
+        return instructors[instructorIndex].difficulty;
+      }
+    } else {
+      //if instructor not found, return 0
+      return 0;
+    }
+  };
+
+  //Main controller for keyboard shortcuts
+  const handleKeyDown = async (e) => {
     //if the active element is any of the inputs, don't do anything
     if (document.activeElement.tagName === "INPUT") {
       return;
     }
 
     if (e.key === "/") {
-      setOpenModal(false);
+      setOpenSettingsModal(false);
       setShowIntro(false);
       e.preventDefault();
       inputRef.current.focus();
@@ -536,29 +409,29 @@ const App = () => {
       setShowIntro(!showIntro);
     } else if (e.key === " ") {
       e.preventDefault();
-      if (showExpandedInfo !== 0) {
-        setShowExpandedInfo(0);
+      if (expandedCourse !== 0) {
+        setExpandedCourse(0);
       } else {
-        setOpenModal(!openModal);
+        setOpenSettingsModal(!openSettingsModal);
       }
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (!openModal) {
+      if (!openSettingsModal) {
         setShowCalendar(!showCalendar);
       } else {
-        setOpenModal(false);
+        setOpenSettingsModal(false);
       }
     } else if (e.key === ";") {
       onCopyClick();
     } else if (e.key === "Escape") {
       e.preventDefault();
-      setOpenModal(false);
+      setOpenSettingsModal(false);
       setShowIntro(false);
-      setShowExpandedInfo(0);
+      setExpandedCourse(0);
       inputRef.current.blur();
     } else if (e.key === "a") {
       e.preventDefault();
-      await setOpenModal(true);
+      await setOpenSettingsModal(true);
       attributesRef.current.focus();
     } else if (e.key === "r") {
       setOnlyOpen(!onlyOpen);
@@ -606,42 +479,22 @@ const App = () => {
       resetOptions();
     }
   };
-  const calculateCourseRating = (course, item) => {
-    const instructorIndex = instructors.findIndex(
-      (inst) => inst.instructor === course?.faculty[0]?.displayName
-    );
 
-    if (instructorIndex !== -1) {
-      if (item === 0) {
-        return instructors[instructorIndex].rating;
-      } else if (item === 1) {
-        return instructors[instructorIndex].percent;
-      } else if (item === 2) {
-        return instructors[instructorIndex].difficulty;
-      }
-    } else {
-      return 0;
-    }
-  };
-
-  const findCourseByID = (id) => {
-    return courses.find((course) => course.id === id);
-  };
-
-  const getBackgroundColor = (course) => {
-    //find index of course in selected courses
-    const index = calendars[activeCalendar].courses.findIndex(
-      (c) => c === course
-    );
-    return colors[index % colors.length];
-  };
-
+  //Main controller for filtering courses
   useEffect(() => {
     const newFilteredCourses = courses.filter((course) => {
-      //business logic in here
+      //if the course is full and the user has selected to only show open courses, return false
       if (onlyOpen && course.seatsAvailable === 0) return false;
+
+      //if the user has selected to only show undergraduate courses, and it is a grad course, return false
       if (onlyGrad && Number(course.courseNumber) > 4999) return false;
+
+      //if the user wants to filter out Qatar campus courses, and it is a Qatar campus course, return false
       if (onlyGU && Number(course.sequenceNumber) >= 70) return false;
+
+      //if the user wants to filter out courses on Friday, and the course is on Friday, return false
+      if (noFriday && course.meetingsFaculty[0]?.meetingTime.friday)
+        return false;
 
       //filter out courses with schedule conflicts
       if (filterConflicts) {
@@ -653,6 +506,7 @@ const App = () => {
             selectedCourse?.meetingsFaculty.length > 0 &&
             course.meetingsFaculty.length > 0
           ) {
+            //check if the course is on the same day
             if (
               (selectedCourse.meetingsFaculty[0].meetingTime.monday &&
                 course.meetingsFaculty[0].meetingTime.monday) ||
@@ -665,6 +519,7 @@ const App = () => {
               (selectedCourse.meetingsFaculty[0].meetingTime.friday &&
                 course.meetingsFaculty[0].meetingTime.friday)
             ) {
+              //check if the course times overlap
               if (
                 Number(
                   course.meetingsFaculty[0].meetingTime.beginTime >=
@@ -693,9 +548,7 @@ const App = () => {
         if (conflict) return false;
       }
 
-      if (noFriday && course.meetingsFaculty[0]?.meetingTime.friday)
-        return false;
-
+      //filter out courses that start before the start time
       if (
         startTime.value &&
         course.meetingsFaculty.length > 0 &&
@@ -706,6 +559,7 @@ const App = () => {
         return false;
       }
 
+      //filter out courses that end after the end time
       if (
         endTime.value &&
         course.meetingsFaculty.length > 0 &&
@@ -715,11 +569,14 @@ const App = () => {
         return false;
       }
 
-      if (attributes.length > 0) {
+      //filter out courses that don't have the selected attributes
+      if (attributesToFilter.length > 0) {
         let hasAttribute = false;
-        for (let i = 0; i < attributes.length; i++) {
+        for (let i = 0; i < attributesToFilter.length; i++) {
           for (let j = 0; j < course.sectionAttributes.length; j++) {
-            if (attributes[i].value === course.sectionAttributes[j].code) {
+            if (
+              attributesToFilter[i].value === course.sectionAttributes[j].code
+            ) {
               hasAttribute = true;
               break;
             }
@@ -728,6 +585,7 @@ const App = () => {
         if (!hasAttribute) return false;
       }
 
+      //filter out courses that don't match the search term
       if (
         !course.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !course.subjectCourse
@@ -746,9 +604,11 @@ const App = () => {
         return false;
       }
 
+      //if none of the filters return false, return true
       return true;
-    });
+    }); //end of filter
 
+    //sort courses by RMP rating if the user has selected to do so
     if (filterByRating) {
       newFilteredCourses.sort((a, b) => {
         return b.rating - a.rating;
@@ -756,15 +616,17 @@ const App = () => {
     }
 
     setFilteredCourses(newFilteredCourses);
-    setHasMore(newFilteredCourses.length > records);
+
+    //updates the hasMore state to determine if the infinite scroll should load more courses
+    setHasMore(newFilteredCourses.length > numberOfCoursesRendered);
   }, [
     searchTerm,
     onlyOpen,
     onlyGrad,
     onlyGU,
     noFriday,
-    records,
-    attributes,
+    numberOfCoursesRendered,
+    attributesToFilter,
     startTime,
     endTime,
     filterConflicts,
@@ -775,92 +637,16 @@ const App = () => {
 
   useEventListener("keydown", handleKeyDown);
 
-  const expandOptions = () => {
-    setOpenModal(!openModal);
+  const toggleSettingsScreen = () => {
+    setOpenSettingsModal(!openSettingsModal);
   };
 
-  const showInfoFunc = (course) => {
-    setShowExpandedInfo(course);
-  };
-
-  const getTimeString = (course) => {
-    let str = "";
-    let empty = false;
-    for (let i = 0; i < course.meetingsFaculty.length; i++) {
-      if (course.meetingsFaculty[i].meetingTime.beginTime == "") {
-        empty = true;
-      }
-      str +=
-        formatTimeFromMilitary(
-          course.meetingsFaculty[i].meetingTime.beginTime
-        ) +
-        " - " +
-        formatTimeFromMilitary(course.meetingsFaculty[i].meetingTime.endTime);
-      if (i < course.meetingsFaculty.length - 1) {
-        str += ", ";
-      }
-    }
-    if (str.length == 0 || str == " - " || empty) {
-      str = "TBA";
-    }
-    return str;
-  };
-
-  const formatTimeFromMilitary = (time) => {
-    if (!time) {
-      return "";
-    }
-    const hour = time.substring(0, 2);
-    const minute = time.substring(2, 4);
-    const formattedHour = hour % 12 || 12;
-    const ampm = hour < 12 ? "AM" : "PM";
-    return formattedHour + ":" + minute + " " + ampm;
-  };
-
-  const formatDaysString = (course) => {
-    let str = "";
-    for (let i = 0; i < course.meetingsFaculty.length; i++) {
-      if (course.meetingsFaculty[i].meetingTime.monday) {
-        str += "M";
-      }
-      if (course.meetingsFaculty[i].meetingTime.tuesday) {
-        str += "T";
-      }
-      if (course.meetingsFaculty[i].meetingTime.wednesday) {
-        str += "W";
-      }
-      if (course.meetingsFaculty[i].meetingTime.thursday) {
-        str += "Th";
-      }
-      if (course.meetingsFaculty[i].meetingTime.friday) {
-        str += "F";
-      }
-      if (i < course.meetingsFaculty.length - 1) {
-        str += ", ";
-      }
-    }
-
-    if (str.length == 0) {
-      str = "TBA";
-    }
-
-    return str;
-  };
-
-  const getCreditHours = (course) => {
-    if (course.creditHours != null) {
-      return course.creditHours + " Credits";
-    } else if (course.creditHourHigh != null) {
-      return course.creditHourHigh + " Credits";
-    } else if (course.creditHourLow != null) {
-      return course.creditHourLow + " Credits";
-    } else {
-      return "TBA";
-    }
+  const showDetailedInfoFunc = (course) => {
+    setExpandedCourse(course);
   };
 
   return (
-    <div className="app dark">
+    <div className="app">
       <button
         onClick={() => setShowCalendar(!showCalendar)}
         className="mobile-calendar">
@@ -868,429 +654,55 @@ const App = () => {
         <p>{showCalendar ? "Hide" : "Show"}</p>
       </button>
       {showIntro && <IntroScreen closeModal={() => setShowIntro(false)} />}
-      {showExpandedInfo !== 0 && (
-        <div className="introscreen-bg">
-          <div className="options animate__animated animate__fadeIn animate__faster">
-            <div className="options-header">
-              <h2>{showExpandedInfo.courseTitle}</h2>
-              <h6 className="keyboard-outline">ESC</h6>
-              <p>or</p>
-              <h6 className="keyboard-outline">Space</h6>
-            </div>
-            <p className="app-settings-subtitle">
-              {showExpandedInfo.subject}-{showExpandedInfo.courseNumber}
-            </p>
-            <h6 className="options-expanded-header">Basic Info</h6>
-            <div className="course-icons-expanded">
-              <div className="course-icon">
-                <img src="/icons/instructor.svg" alt="instructor" />
-
-                <a
-                  target="_blank"
-                  href={
-                    "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
-                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
-                  }>
-                  {showExpandedInfo.faculty.length > 0
-                    ? showExpandedInfo.faculty[0].displayName
-                    : "Not Available"}
-                </a>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/seats.svg" alt="Seats" />
-
-                <p>
-                  <span className="large-text">
-                    {showExpandedInfo.seatsAvailable}
-                  </span>
-                  <span className="small-text">
-                    {"/" + showExpandedInfo.maximumEnrollment}{" "}
-                  </span>
-                  Left
-                </p>
-                <p>
-                  <span className="large-text">
-                    {showExpandedInfo.waitAvailable}
-                  </span>
-                  <span className="small-text">
-                    {"/" + showExpandedInfo.waitCapacity}{" "}
-                  </span>
-                  WL
-                </p>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/location.svg" alt="location" />
-                <p>
-                  {showExpandedInfo.meetingsFaculty.length > 0 &&
-                  showExpandedInfo.meetingsFaculty[0].meetingTime.building
-                    ? showExpandedInfo.meetingsFaculty[0].meetingTime.building +
-                      "-" +
-                      showExpandedInfo.meetingsFaculty[0].meetingTime.room
-                    : "TBA"}
-                </p>
-              </div>
-
-              <div className="course-icon">
-                <img src="/icons/star.svg" alt="rating" />
-                <a
-                  target="_blank"
-                  href={
-                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
-                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
-                  }>
-                  {showExpandedInfo.faculty.length > 0
-                    ? showExpandedInfo.rating
-                    : "N/A"}
-
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.rating >= 4 && (
-                      <div className="color-circle-green"></div>
-                    )}
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.rating < 4 &&
-                    showExpandedInfo.rating >= 3 && (
-                      <div className="color-circle-yellow"></div>
-                    )}
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.rating < 3 && (
-                      <div className="color-circle-red"></div>
-                    )}
-                </a>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/star.svg" alt="rating" />
-                <a
-                  target="_blank"
-                  href={
-                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
-                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
-                  }>
-                  {showExpandedInfo.faculty.length > 0
-                    ? showExpandedInfo.ratingDifficulty + " Difficulty"
-                    : "N/A Difficulty"}
-
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.ratingDifficulty < 2.5 && (
-                      <div className="color-circle-green"></div>
-                    )}
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.rating < 4 &&
-                    showExpandedInfo.ratingDifficulty >= 2.5 && (
-                      <div className="color-circle-yellow"></div>
-                    )}
-                  {showExpandedInfo.rating !== "N/A" &&
-                    showExpandedInfo.ratingDifficulty > 4 && (
-                      <div className="color-circle-red"></div>
-                    )}
-                </a>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/star.svg" alt="rating" />
-                <a
-                  target="_blank"
-                  href={
-                    "https://www.ratemyprofessors.com/search/professors/355?q=" +
-                    encodeURIComponent(showExpandedInfo.faculty[0]?.displayName)
-                  }>
-                  {showExpandedInfo.faculty.length > 0
-                    ? showExpandedInfo.ratingPercent + " Would Take Again"
-                    : "N/A"}
-                </a>
-              </div>
-
-              <div className="course-icon">
-                <img src="/icons/time.svg" alt="time" />
-                <p>{getTimeString(showExpandedInfo)}</p>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/days.svg" alt="Days" />
-                <p>{formatDaysString(showExpandedInfo)}</p>
-              </div>
-              <div className="course-icon">
-                <img src="/icons/fast.svg" alt="time" />
-                <p>{getCreditHours(showExpandedInfo)}</p>
-              </div>
-            </div>
-            <div className="course-attributes">
-              {showExpandedInfo.sectionAttributes.length > 0 &&
-                showExpandedInfo.sectionAttributes.map((attribute) => {
-                  if (attribute.code != "MEAN") {
-                    return (
-                      <p className="course-attribute">
-                        {attribute.description}
-                      </p>
-                    );
-                  }
-                })}
-            </div>
-            <h6 className="options-expanded-header">Course Description</h6>
-            <p>
-              {getCourseDescription(showExpandedInfo.courseReferenceNumber)}
-            </p>
-            <h6 className="options-expanded-header">Prerequisites</h6>
-            <p>{getPreqExpression(showExpandedInfo.courseReferenceNumber)}</p>
-            {preReqOptions.length > 0 && (
-              <div>
-                <h6 className="options-expanded-header">
-                  Prerequisites Checker
-                </h6>
-                <p>
-                  We get it can be confusing to read that. Select which classes
-                  you've already taken to see if you can take this one.
-                </p>
-              </div>
-            )}
-            {preReqOptions.length > 0 && (
-              <div className="options-preq-selectors">
-                {preReqOptions.length > 0 ? (
-                  preReqOptions.map((option) => {
-                    return (
-                      <div className="options-preq-selector">
-                        <label class="custom-checkbox-container">
-                          <input
-                            type="checkbox"
-                            id={option.value}
-                            name={option.value}
-                            value={option.isChecked}
-                            onChange={() => {
-                              const newOptions = preReqOptions.map((o) => {
-                                if (o.value === option.value) {
-                                  return {
-                                    ...o,
-                                    isChecked: !o.isChecked,
-                                  };
-                                } else {
-                                  return o;
-                                }
-                              });
-                              setPreReqOptions(newOptions);
-                            }}
-                          />
-                          <span class="checkmark"></span>
-                        </label>
-
-                        <p>{option.label}</p>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p>No Prerequisites</p>
-                )}
-              </div>
-            )}
-
-            {preReqOptions.length > 0 && (
-              <div className="options-preq-checker-status">
-                <p className="options-preq-checker-label">Status:</p>
-                <span className={!preReqStatus ? "red-bg" : "green-bg"}>
-                  <p className="options-expanded-status">
-                    {preReqStatus ? "Eligble!" : "Ineligble"}
-                  </p>
-                  {preReqStatus ? <FaCheck /> : <FaX />}
-                </span>
-              </div>
-            )}
-
-            <div className="options-expanded-buttons">
-              <button
-                className="options-expanded-button-close"
-                onClick={() => setShowExpandedInfo(0)}>
-                Close
-              </button>
-              <button
-                className="options-expanded-button-add"
-                onClick={() => addCourse(showExpandedInfo.id)}>
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
+      {expandedCourse !== 0 && (
+        <ExpandedView
+          expandedCourse={expandedCourse}
+          addCourse={addCourse}
+          preReqOptions={preReqOptions}
+          setPreReqOptions={setPreReqOptions}
+          preReqStatus={preReqStatus}
+          setPreReqStatus={setPreReqStatus}
+          getPreqExpression={getPreqExpression}
+          getCourseDescription={getCourseDescription}
+        />
       )}
-      {openModal && (
-        <div className="introscreen-bg">
-          <div className="options animate__animated animate__fadeIn animate__faster">
-            <div className="options-header">
-              <h2>Search Filters</h2>
-              <h6 className="keyboard-outline">ESC</h6>
-              <p>or</p>
-              <h6 className="keyboard-outline">Space</h6>
-            </div>
-            <p className="app-settings-subtitle">
-              Thoughtfully designed to make your experience seamless.
-            </p>
 
-            <div className="options-content">
-              <div className="options-content-left">
-                <h3>Your Search Settings</h3>
-                <div className="option">
-                  <h6 className="keyboard-outline">R</h6>
-                  <p>Show only classes with seats available</p>
-                  <Toggle
-                    checked={onlyOpen}
-                    className="toggle"
-                    onChange={() => setOnlyOpen(!onlyOpen)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">U</h6>
-                  <p>Show only undergraduate classes</p>
-                  <Toggle
-                    checked={onlyGrad}
-                    className="toggle"
-                    onChange={() => setOnlyGrad(!onlyGrad)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">C</h6>
-                  <p>Hide classes with schedule conflict</p>
-                  <Toggle
-                    checked={filterConflicts}
-                    className="toggle"
-                    onChange={() => setFilterConflicts(!filterConflicts)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">Q</h6>
-                  <p>Hide Qatar classes</p>
-                  <Toggle
-                    checked={onlyGU}
-                    className="toggle"
-                    onChange={() => setOnlyGU(!onlyGU)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">F</h6>
-                  <p>Hide Friday classes</p>
-                  <Toggle
-                    checked={noFriday}
-                    className="toggle"
-                    onChange={() => setNoFriday(!noFriday)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">`</h6>
-                  <p>Sort by RMP Rating</p>
-                  <Toggle
-                    checked={filterByRating}
-                    className="toggle"
-                    onChange={() => setFilterByRating(!filterByRating)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">I</h6>
-                  <p>Show Course Info</p>
-                  <Toggle
-                    checked={showCourseInfo}
-                    className="toggle"
-                    onChange={() => setShowCourseInfo(!showCourseInfo)}
-                  />
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">P</h6>
-                  <p>Show Course Attributes</p>
-                  <Toggle
-                    checked={showCourseAttributes}
-                    className="toggle"
-                    onChange={() =>
-                      setShowCourseAttributes(!showCourseAttributes)
-                    }
-                  />
-                </div>
-
-                <h5>Filter by attribute</h5>
-                <div className="option">
-                  <Select
-                    isMulti
-                    name="attributes"
-                    defaultValue={attributes}
-                    className="time-select"
-                    options={attributeOptions}
-                    onChange={(e) => setAttributes(e)}
-                    placeholder="Filter by Attribute"
-                    ref={attributesRef}
-                  />
-                </div>
-                <div className="time-options">
-                  <h5>Class starts after...</h5>
-                  <h5>Class ends before...</h5>
-                  <div className="option">
-                    <Select
-                      name="start-time"
-                      options={timeOptions}
-                      value={{ label: startTime.label }}
-                      className="time-select"
-                      onChange={(e) => setStartTime(e)}
-                    />
-                  </div>
-
-                  <div className="option">
-                    <Select
-                      name="end-time"
-                      value={{ label: endTime.label }}
-                      className="time-select"
-                      options={timeOptions}
-                      onChange={(e) => setEndTime(e)}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="options-content-right">
-                <h3>All Keyboard Shortcuts</h3>
-
-                <div className="option">
-                  <h6 className="keyboard-outline">Space</h6>
-                  <p>Open Menu</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">Enter</h6>
-                  <p>Toggle Calendar</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">Tab</h6>
-                  <p>Reset all filters</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">/</h6>
-                  <p>Search for class</p>
-                </div>
-
-                <div className="option">
-                  <h6 className="keyboard-outline">Escape</h6>
-                  <p>Unfocus search</p>
-                </div>
-
-                <div className="option">
-                  <h6 className="keyboard-outline">A</h6>
-                  <p>Add attribute filter</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">?</h6>
-                  <p>Toggle Intro Screen</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">-</h6>
-                  <h6 className="keyboard-outline">=</h6>
-                  <p>Change start time filter</p>
-                </div>
-                <div className="option">
-                  <h6 className="keyboard-outline">[</h6>
-                  <h6 className="keyboard-outline">]</h6>
-                  <p>Change end time filter</p>
-                </div>
-              </div>
-            </div>
-            <button className="option-button" onClick={expandOptions}>
-              Close
-            </button>
-          </div>
-        </div>
+      {openSettingsModal && (
+        <Settings
+          onlyOpen={onlyOpen}
+          setOnlyOpen={setOnlyOpen}
+          onlyGrad={onlyGrad}
+          setOnlyGrad={setOnlyGrad}
+          onlyGU={onlyGU}
+          setOnlyGU={setOnlyGU}
+          noFriday={noFriday}
+          setNoFriday={setNoFriday}
+          filterByRating={filterByRating}
+          setFilterByRating={setFilterByRating}
+          showCourseInfo={showCourseInfo}
+          setShowCourseInfo={setShowCourseInfo}
+          showCourseAttributes={showCourseAttributes}
+          setShowCourseAttributes={setShowCourseAttributes}
+          attributesToFilter={attributesToFilter}
+          setAttributesToFilter={setAttributesToFilter}
+          attributesRef={attributesRef}
+          startTime={startTime}
+          setStartTime={setStartTime}
+          endTime={endTime}
+          setEndTime={setEndTime}
+          toggleSettingsScreen={toggleSettingsScreen}
+          timeOptions={timeOptions}
+          attributeOptions={attributeOptions}
+          setFilterConflicts={setFilterConflicts}
+          filterConflicts={filterConflicts}
+        />
       )}
       <div className="container">
         <div className="content">
           <div className="header">
-            <h1 onClick={() => setShowIntro(true)}>Hoya Courses</h1>
+            <h1>Hoya Courses</h1>
           </div>
-          <h5 className="app-subtitle" onClick={() => setShowCalendar(false)}>
+          <h5 className="app-subtitle">
             The best way to find classes at Georgetown. Built for students.
           </h5>
           <div className="searchFields">
@@ -1309,7 +721,7 @@ const App = () => {
               <FaMagnifyingGlass className="input-logo" />
             </div>
 
-            <button className="settings" onClick={expandOptions}>
+            <button className="settings" onClick={toggleSettingsScreen}>
               <FaSliders />
               <p>More</p>
             </button>
@@ -1319,7 +731,7 @@ const App = () => {
           </h2>
 
           <InfiniteScroll
-            dataLength={records}
+            dataLength={numberOfCoursesRendered}
             className="courses"
             next={loadMore}
             hasMore={hasMore}
@@ -1334,35 +746,18 @@ const App = () => {
                 <p>Loading more classes, hang tight.</p>
               </div>
             }>
-            {filteredCourses.slice(0, records).map((course, index) => {
-              if (index % 13 == 8) {
-                return (
-                  <Course
-                    course={course}
-                    key={course.id}
-                    showInfo={showInfoFunc}
-                    showInfoToggle={showCourseInfo}
-                    func={() => addCourse(course.id)}
-                    hoverFunc={() => setHoveredCourseID(course.id)}
-                    unhoverFunc={() => setHoveredCourseID(null)}
-                    showAttributes={showCourseAttributes}
-                  />
-                );
-              } else {
-                return (
-                  <Course
-                    course={course}
-                    key={course.id}
-                    showInfo={showInfoFunc}
-                    showInfoToggle={showCourseInfo}
-                    func={() => addCourse(course.id)}
-                    hoverFunc={() => setHoveredCourseID(course.id)}
-                    unhoverFunc={() => setHoveredCourseID(null)}
-                    showAttributes={showCourseAttributes}
-                  />
-                );
-              }
-            })}
+            {filteredCourses.slice(0, numberOfCoursesRendered).map((course) => (
+              <Course
+                course={course}
+                key={course.id}
+                showInfo={showDetailedInfoFunc}
+                showInfoToggle={showCourseInfo}
+                func={() => addCourse(course.id)}
+                hoverFunc={() => setHoveredCourseID(course.id)}
+                unhoverFunc={() => setHoveredCourseID(null)}
+                showAttributes={showCourseAttributes}
+              />
+            ))}
           </InfiniteScroll>
           {filteredCourses.length === 0 && (
             <div className="no-results">
@@ -1376,173 +771,20 @@ const App = () => {
           )}
         </div>
         {showCalendar && (
-          <div className="right animate__animated animate__slideInRight animate__faster">
-            <h4
-              className="calendar-close"
-              onClick={() => setShowCalendar(false)}></h4>
-            <div className="calendar-header">
-              <h2>Your Schedules</h2>
-              <button className="calendar-copy" onClick={onCopyClick}>
-                <p>Copy CRNs</p>
-                <FaCopy />
-              </button>
-            </div>
-            <div className="calendar-list">
-              {Object.keys(calendars).map((calendar, index) => (
-                <div
-                  className={`calendar-item ${
-                    activeCalendar === index ? "active-calendar" : ""
-                  }`}
-                  onClick={() => setActiveCalendar(index)}>
-                  <h6>{calendars[calendar].name}</h6>
-                  <p>{calendars[calendar].courses.length} courses</p>
-                </div>
-              ))}
-            </div>
-            <div className="calendar-list"></div>
-            <h4>{getCreditNumber()}</h4>
-            <div className="calendar">
-              <div className="calendar-day slot-label-column">
-                <p>.</p>
-                {times.map((time, index) => {
-                  if (index % 12 === 0) {
-                    return (
-                      <div className="calendar-slot slot-label border-top">
-                        {(Number(time) / 100) % 12 || 12}
-                      </div>
-                    );
-                  } else {
-                    return <div className="calendar-slot slot-label"></div>;
-                  }
-                })}
-              </div>
-              {days.map((day) => (
-                <div className="calendar-day">
-                  <p>{day}</p>
-                  {times.map((time, index) => {
-                    let hover = false;
-                    //if any selected courses have a meeting at this time, display it
-
-                    const coursesAtTime = calendars[
-                      activeCalendar
-                    ].courses.filter((courseID) => {
-                      const course = findCourseByID(courseID);
-
-                      if (course.meetingsFaculty.length > 0) {
-                        return (
-                          switchDayOfWeek(courseID, day) &&
-                          Number(
-                            course.meetingsFaculty[0].meetingTime.beginTime
-                          ) <= Number(time) &&
-                          Number(
-                            course.meetingsFaculty[0].meetingTime.endTime
-                          ) > Number(time)
-                        );
-                      }
-                    });
-
-                    if (hoveredCourseID) {
-                      const hoveredCourse = findCourseByID(hoveredCourseID);
-
-                      if (hoveredCourse?.meetingsFaculty.length > 0) {
-                        hover =
-                          switchDayOfWeek(hoveredCourseID, day) &&
-                          Number(
-                            hoveredCourse.meetingsFaculty[0].meetingTime
-                              .beginTime
-                          ) <= Number(time) &&
-                          Number(
-                            hoveredCourse.meetingsFaculty[0].meetingTime.endTime
-                          ) > Number(time);
-                      }
-                    }
-
-                    if (hover) {
-                      return (
-                        <div
-                          className={
-                            index % 12 === 0
-                              ? "calendar-slot slot-filled  border-top"
-                              : "calendar-slot slot-filled"
-                          }
-                          style={{
-                            backgroundColor: "#e1e1e1",
-                          }}></div>
-                      );
-                    } else if (coursesAtTime.length === 0) {
-                      return (
-                        <div
-                          className={
-                            index % 12 === 0
-                              ? "calendar-slot slot-empty  border-top"
-                              : "calendar-slot slot-empty"
-                          }></div>
-                      );
-                    } else {
-                      return (
-                        <div
-                          className={
-                            index % 12 === 0
-                              ? "calendar-slot slot-filled  border-top"
-                              : "calendar-slot slot-filled"
-                          }
-                          style={{
-                            backgroundColor: getBackgroundColor(
-                              coursesAtTime[0]
-                            ),
-                            borderColor: getBackgroundColor(coursesAtTime[0]),
-                          }}>
-                          {" "}
-                          <div className="calendar-tooltip">
-                            <h5>
-                              {findCourseByID(coursesAtTime[0]).courseTitle}
-                            </h5>
-                            <h6>
-                              {findCourseByID(coursesAtTime[0]).subject} -{" "}
-                              {findCourseByID(coursesAtTime[0]).courseNumber}
-                            </h6>
-                            <h6>
-                              {formatMilitaryTime(
-                                findCourseByID(coursesAtTime[0])
-                                  .meetingsFaculty[0].meetingTime.beginTime
-                              )}{" "}
-                              -{" "}
-                              {formatMilitaryTime(
-                                findCourseByID(coursesAtTime[0])
-                                  .meetingsFaculty[0].meetingTime.endTime
-                              )}
-                            </h6>
-                          </div>
-                        </div>
-                      );
-                    }
-                  })}
-                </div>
-              ))}
-            </div>
-            <h2>{calendars[activeCalendar].name}'s Courses</h2>
-            <p className="right-subtitle">
-              Click a course to remove it from this plan.
-            </p>
-            <div className="selected-courses">
-              {calendars[activeCalendar].courses.map((course, index) => (
-                <CalendarCourse
-                  color={getBackgroundColor(course)}
-                  course={findCourseByID(course)}
-                  key={course}
-                  func={() => removeCourse(course)}
-                />
-              ))}
-            </div>
-            {calendars[activeCalendar].courses.length === 0 && (
-              <div className="empty-calendar">
-                <p>
-                  No courses added yet. Click on a course to add it to this
-                  plan.
-                </p>
-              </div>
-            )}
-          </div>
+          <CalendarView
+            calendars={calendars}
+            activeCalendar={activeCalendar}
+            setActiveCalendar={setActiveCalendar}
+            hoveredCourseID={hoveredCourseID}
+            removeCourse={removeCourse}
+            onCopyClick={onCopyClick}
+            findCourseByID={findCourseByID}
+            switchDayOfWeek={switchDayOfWeek}
+            getBackgroundColor={getBackgroundColor}
+            getCreditNumber={getCreditNumber}
+            days={days}
+            times={times}
+          />
         )}
       </div>
     </div>

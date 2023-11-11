@@ -1,8 +1,5 @@
 import React from "react";
-import instructors from "./instructors";
 import "animate.css";
-import { useState, useEffect } from "react";
-import useEventListener from "@use-it/event-listener";
 
 import { FaExpand, FaPlus } from "react-icons/fa6";
 
@@ -15,22 +12,6 @@ const Course = ({
   showInfo,
   showInfoToggle,
 }) => {
-  const [show, setShow] = useState(0);
-
-  const calculateCourseRating = (course) => {
-    //find index of course in instructor array based on instructor name
-    const instructorIndex = instructors.findIndex(
-      (inst) => inst.instructor === course.faculty[0]?.displayName
-    );
-    if (instructorIndex === -1) {
-      return "N/A";
-    } else {
-      return (
-        10 * instructors[instructorIndex].rating +
-        (6 - instructors[instructorIndex].difficulty) * 10
-      );
-    }
-  };
   const getTimeString = () => {
     let str = "";
     let empty = false;
@@ -48,7 +29,7 @@ const Course = ({
         str += ", ";
       }
     }
-    if (str.length == 0 || str == " - " || empty) {
+    if (str.length === 0 || str === " - " || empty) {
       str = "TBA";
     }
     return str;
@@ -67,17 +48,6 @@ const Course = ({
 
   const formatTitle = (title) => {
     return title.replace(/&amp;/g, "&");
-  };
-
-  const retrieveInstructorRating = (instructor) => {
-    const instructorObject = instructors.find(
-      (inst) => inst.instructor === instructor
-    );
-    if (instructorObject && instructorObject.rating !== 0) {
-      return instructorObject.rating;
-    } else {
-      return "N/A";
-    }
   };
 
   const formatDaysString = () => {
@@ -122,8 +92,6 @@ const Course = ({
     }
   };
 
-  const rating = retrieveInstructorRating(course.faculty[0]?.displayName);
-
   return (
     <div
       className="course animate__animated animate__fadeIn animate__faster"
@@ -146,6 +114,7 @@ const Course = ({
 
             <a
               target="_blank"
+              rel="noreferrer"
               href={
                 "https://gufaculty360.georgetown.edu/s/global-search?searchText=" +
                 encodeURIComponent(course.faculty[0]?.displayName)
@@ -160,19 +129,22 @@ const Course = ({
             <img src="/icons/star.svg" alt="rating" />
             <a
               target="_blank"
+              rel="noreferrer"
               href={
                 "https://www.ratemyprofessors.com/search/professors/355?q=" +
                 encodeURIComponent(course.faculty[0]?.displayName)
               }>
-              {course.faculty.length > 0 ? rating : "N/A"}
+              {course.faculty.length > 0 ? course.rating : "N/A"}
 
-              {rating !== "N/A" && rating >= 4 && (
+              {course.rating !== "N/A" && course.rating >= 4 && (
                 <div className="color-circle-green"></div>
               )}
-              {rating !== "N/A" && rating < 4 && rating >= 3 && (
-                <div className="color-circle-yellow"></div>
-              )}
-              {rating !== "N/A" && rating < 3 && (
+              {course.rating !== "N/A" &&
+                course.rating < 4 &&
+                course.rating >= 3 && (
+                  <div className="color-circle-yellow"></div>
+                )}
+              {course.rating !== "N/A" && course.rating < 3 && (
                 <div className="color-circle-red"></div>
               )}
             </a>
@@ -223,7 +195,7 @@ const Course = ({
             <p>Open seat(s) likely reserved for WL.</p>
           </div>
         )}
-      {course.seatsAvailable == 0 && (
+      {course.seatsAvailable === 0 && (
         <div className="course-warning">
           <img src="/icons/alert.svg" alt="alert" />
           <p>Course is full :(</p>
@@ -233,7 +205,7 @@ const Course = ({
         <div className="course-attributes">
           {course.sectionAttributes.length > 0 &&
             course.sectionAttributes.map((attribute) => {
-              if (attribute.code != "MEAN") {
+              if (attribute.code !== "MEAN") {
                 return <p className="course-attribute">{attribute.code}</p>;
               }
             })}
