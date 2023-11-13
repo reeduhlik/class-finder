@@ -11,6 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        repository: reeduhlik/hoya-courses
         token: S{{ secrets.PAT }}
         ref: ${{ github.head_ref }}
     - uses: actions/setup-python@v4
