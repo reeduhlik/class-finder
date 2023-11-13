@@ -11,9 +11,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        repository: reeduhlik/hoya-courses
-        token: S{{ secrets.PAT }}
-        ref: ${{ github.head_ref }}
+        token: ${{ secrets.PAT }}
+    - name: Switch to main branch
+      run: git checkout main
     - uses: actions/setup-python@v4
       with:
         python-version: 3.9
