@@ -64,7 +64,7 @@ try:
         #store the json data from the url in a file called data.json
         #currently a weird bug on page 7 where the data is empty - skip over it until Georgetown fixes it
         if i != 7:
-            with open(f'./src/courseData/page{i}.json', 'w') as f:
+            with open(f'./src/coursePages/page{i}.json', 'w') as f:
                 json.dump(data, f)
 except Exception as e:
     print("Duo timed out.")
