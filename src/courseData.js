@@ -10,6 +10,7 @@ import page8 from "./coursePages/page8.json";
 import page9 from "./coursePages/page9.json";
 import page10 from "./coursePages/page10.json";
 import page11 from "./coursePages/page11.json";
+import page12 from "./coursePages/page12.json";
 
 import descriptions0 from "./descriptions/descriptions0.json";
 import descriptions1 from "./descriptions/descriptions1.json";
@@ -51,7 +52,8 @@ const mergePages = () => {
       page8.data,
       page9.data,
       page10.data,
-      page11.data
+      page11.data,
+      page12.data
     )
     .filter((course) => course != null);
 };
