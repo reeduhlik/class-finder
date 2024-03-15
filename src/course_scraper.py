@@ -20,7 +20,7 @@ PASSWORD = os.environ.get('GEORGETOWN_PASSWORD')
 
 
 first_url="https://myaccess9.georgetown.edu/BannerExtensibility/customPage/page/HOMEPAGE"
-second_url = "https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202330&startDatepicker=&endDatepicker=&uniqueSessionId=ivy131690476819227&pageOffset=0&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc"
+
 
 
 print('Logging in...')
@@ -46,8 +46,8 @@ try:
 
     #navigate to the search page
     driver.find_element(By.CLASS_NAME, "select2-arrow").click()
-    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202410')))
-    driver.find_element(By.ID, "202410").click()
+    WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, '202430')))
+    driver.find_element(By.ID, "202430").click()
     driver.find_element(By.ID, "term-go").click()
 
     WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'search-go')))
@@ -56,16 +56,15 @@ try:
     ##now we can get the json data by looping through each page
     for i in range(0, 12):
         print(" Fetching page " + str(i))
-        driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202410&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
+        driver.get("https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?txt_term=202430&startDatepicker=&endDatepicker=&uniqueSessionId=" + code + "&pageOffset=" + str(500*i) + "&pageMaxSize=500&sortColumn=subjectDescription&sortDirection=asc")
         print("  Page " + str(i) + " fetched.")
         pre = driver.find_element(By.TAG_NAME, "pre").text
         data = json.loads(pre)
 
         #store the json data from the url in a file called data.json
         #currently a weird bug on page 7 where the data is empty - skip over it until Georgetown fixes it
-        if i != 7:
-            with open(f'./src/coursePages/page{i}.json', 'w') as f:
-                json.dump(data, f)
+        with open(f'./src/coursePages/page{i}.json', 'w') as f:
+            json.dump(data, f)
 except Exception as e:
     print("Duo timed out.")
     print(e)

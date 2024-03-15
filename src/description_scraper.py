@@ -6,11 +6,11 @@ import requests
 count = 1
 url = 'https://bn-reg.uis.georgetown.edu/StudentRegistrationSsb/ssb/searchResults/getCourseDescription'
 
-for i in range(1, 12):
+for i in range(0, 12):
 
     descriptions = []
 
-    with open(f'./src/page{i}.json', 'r') as f:
+    with open(f'./src/coursePages/page{i}.json', 'r') as f:
         data = json.load(f)
 
     # Define the url to make post requests to
@@ -29,7 +29,7 @@ for i in range(1, 12):
         crn = obj['courseReferenceNumber']
         
         # Define the form-data payload
-        payload = {'courseReferenceNumber': crn, 'term': '202410', 'first': 'first'}
+        payload = {'courseReferenceNumber': crn, 'term': '202430', 'first': 'first'}
         
         # Make the post request and output the returned content
         response = requests.post(url, data=payload)
@@ -42,6 +42,8 @@ for i in range(1, 12):
         start = text.find('>', text.find('>') + 1) + 1
         end = text.find('<', start)
         text = text[start:end]
+
+        print(text)
 
         #add text with CRN to a JSON object
 
