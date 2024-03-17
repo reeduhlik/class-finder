@@ -88,9 +88,29 @@ const App = () => {
 
     const savedCalendars = JSON.parse(localCalendars);
 
-    //if there are no saved calendars, create 3 default ones
-    return (
-      savedCalendars || [
+    const currentPeriod = localStorage.getItem("currentPeriod");
+
+    if (currentPeriod && currentPeriod === "F24") {
+      return (
+        savedCalendars || [
+          {
+            name: "Plan #1",
+            courses: [],
+          },
+          {
+            name: "Plan #2",
+            courses: [],
+          },
+          {
+            name: "Plan #3",
+            courses: [],
+          },
+        ]
+      );
+    } else {
+      //set the current period to F24 and return the default calendars
+      localStorage.setItem("currentPeriod", "F24");
+      return [
         {
           name: "Plan #1",
           courses: [],
@@ -103,8 +123,8 @@ const App = () => {
           name: "Plan #3",
           courses: [],
         },
-      ]
-    );
+      ];
+    }
   });
 
   const [activeCalendar, setActiveCalendar] = useState(0);
