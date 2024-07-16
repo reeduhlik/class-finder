@@ -19,13 +19,15 @@ PASSWORD = os.environ.get('GEORGETOWN_PASSWORD')
 
 
 
-first_url="https://myaccess9.georgetown.edu/BannerExtensibility/customPage/page/HOMEPAGE"
-
-
+first_url="https://experience.elluciancloud.com/gu549"
 
 print('Logging in...')
 #use selenium to get the json from the url
 driver.get(first_url)
+
+# Wait for redirect to Georgetown login page
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, 'j_username')))
+
 driver.find_element(By.NAME, "j_username").send_keys(USERNAME)
 driver.find_element(By.NAME, "j_password").send_keys(PASSWORD)
 driver.find_element(By.NAME, "_eventId_proceed").click()
