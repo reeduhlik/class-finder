@@ -247,9 +247,7 @@ const App = () => {
     if (numberOfCoursesRendered > filteredCourses.length) {
       setHasMore(false);
     } else {
-      setTimeout(() => {
-        setNumberOfCoursesRendered(numberOfCoursesRendered + 6);
-      }, 1000);
+      setNumberOfCoursesRendered(numberOfCoursesRendered + 6);
     }
   };
 
