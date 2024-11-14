@@ -8,7 +8,7 @@ import "animate.css/animate.min.css";
 import { FaSliders, FaRegCalendar, FaMagnifyingGlass } from "react-icons/fa6";
 import useEventListener from "@use-it/event-listener";
 
-import { courseData, descriptionData, prereqData } from "./courseData";
+import { courseData } from "./courseData";
 import instructors from "./instructors";
 
 import "./App.css";
@@ -64,8 +64,6 @@ const App = () => {
 
   //get data from courseData.js
   const courses = courseData;
-  const prereqs = prereqData;
-  const descriptions = descriptionData;
 
   const inputRef = useRef(null);
   const attributesRef = useRef(null);
@@ -135,10 +133,6 @@ const App = () => {
   //determined by traversing through all courses and finding unique attributes
   const [attributeOptions, setAttributeOptions] = useState([]);
 
-  //updates to show the different pre-requisites for the course currently expanded
-  const [preReqOptions, setPreReqOptions] = useState([]);
-  const [preReqStatus, setPreReqStatus] = useState(false);
-
   //Variables that a user can filter by
   const [searchTerm, setSearchTerm] = useState("");
   const [onlyOpen, setOnlyOpen] = useState(false);
@@ -153,26 +147,6 @@ const App = () => {
 
   const [numberOfCoursesRendered, setNumberOfCoursesRendered] = useState(12);
   const [hasMore, setHasMore] = useState(true);
-
-  //returns the pre-requisite expression for a course from its crn
-  const getPreqExpression = (crn) => {
-    const prereq = prereqs.find(
-      (prereq) => prereq.courseReferenceNumber === crn
-    );
-    if (prereq) {
-      return prereq.prerequisites;
-    } else {
-      return "No prerequisites.";
-    }
-  };
-
-  //returns course description based on course reference number
-  const getCourseDescription = (crn) => {
-    const description = descriptions.find(
-      (desc) => desc.courseReferenceNumber === crn
-    );
-    return description?.description || "No description available.";
-  };
 
   //calculates the total number of credits in the active calendar
   const getCreditNumber = () => {
@@ -218,7 +192,7 @@ const App = () => {
   const getBackgroundColor = (course) => {
     //find index of course in selected courses
     const index = calendars[activeCalendar].courses.findIndex(
-      (c) => c === course
+      (c) => c === course,
     );
     return colors[index % colors.length];
   };
@@ -278,67 +252,6 @@ const App = () => {
     });
   };
 
-  //when expanded course changes, update the pre-requisite options
-  useEffect(() => {
-    const expression = getPreqExpression(expandedCourse.courseReferenceNumber);
-
-    if (expression !== "N/A") {
-      const regex =
-        /\(([^()]*(?:\([^()]*\))*)\s+(Or|And)\s+([^()]*(?:\([^()]*\))*)\)/g;
-
-      const elementsInRegEx = [];
-      let match;
-
-      while ((match = regex.exec(expression)) !== null) {
-        //if not already in the array, add it
-
-        if (!elementsInRegEx.includes(match[1])) {
-          elementsInRegEx.push(match[1]);
-        }
-        if (!elementsInRegEx.includes(match[3])) {
-          elementsInRegEx.push(match[3]);
-        }
-      }
-
-      if (elementsInRegEx.length > 0) {
-        setPreReqOptions(
-          elementsInRegEx.map((c) => {
-            //label is the text before Undergarduate or Graduate
-
-            return { value: c, label: c, isChecked: false };
-          })
-        );
-      }
-    }
-  }, [expandedCourse]);
-
-  //updates the pre-requisite status when the user toggles a pre-requisite
-  useEffect(() => {
-    let expression = getPreqExpression(expandedCourse.courseReferenceNumber);
-
-    if (expression !== "N/A") {
-      for (const i in preReqOptions) {
-        const value = preReqOptions[i].isChecked;
-        expression = expression.replace(preReqOptions[i].value, value);
-      }
-
-      expression = expression.replace(/Or/g, "||");
-      expression = expression.replace(/And/g, "&&");
-
-      try {
-        // Use eval to evaluate the boolean expression
-        const result = eval(expression);
-
-        setPreReqStatus(result);
-
-        // The result will be a boolean value (true or false)
-      } catch (error) {
-        // Handle any parsing or evaluation errors
-        setPreReqStatus(false);
-      }
-    }
-  }, [preReqOptions]);
-
   //update calendar lcoal storage when calendar changes
   useEffect(() => {
     localStorage.setItem("calendars", JSON.stringify(calendars));
@@ -394,7 +307,7 @@ const App = () => {
   //find index of course in instructor array based on instructor name
   const calculateCourseRating = (course, item) => {
     const instructorIndex = instructors.findIndex(
-      (inst) => inst.instructor === course?.faculty[0]?.displayName
+      (inst) => inst.instructor === course?.faculty[0]?.displayName,
     );
 
     if (instructorIndex !== -1) {
@@ -542,20 +455,20 @@ const App = () => {
                 Number(
                   course.meetingsFaculty[0].meetingTime.beginTime >=
                     Number(
-                      selectedCourse.meetingsFaculty[0].meetingTime.beginTime
+                      selectedCourse.meetingsFaculty[0].meetingTime.beginTime,
                     ) &&
                     Number(course.meetingsFaculty[0].meetingTime.beginTime) <=
                       Number(
-                        selectedCourse.meetingsFaculty[0].meetingTime.endTime
-                      )
+                        selectedCourse.meetingsFaculty[0].meetingTime.endTime,
+                      ),
                 ) ||
                 (Number(course.meetingsFaculty[0].meetingTime.endTime) >=
                   Number(
-                    selectedCourse.meetingsFaculty[0].meetingTime.beginTime
+                    selectedCourse.meetingsFaculty[0].meetingTime.beginTime,
                   ) &&
                   Number(course.meetingsFaculty[0].meetingTime.endTime) <=
                     Number(
-                      selectedCourse.meetingsFaculty[0].meetingTime.endTime
+                      selectedCourse.meetingsFaculty[0].meetingTime.endTime,
                     ))
               ) {
                 conflict = true;
@@ -667,7 +580,8 @@ const App = () => {
     <div className="app">
       <button
         onClick={() => setShowCalendar(!showCalendar)}
-        className="mobile-calendar">
+        className="mobile-calendar"
+      >
         <FaRegCalendar />
         <p>{showCalendar ? "Hide" : "Show"}</p>
       </button>
@@ -676,12 +590,7 @@ const App = () => {
         <ExpandedView
           expandedCourse={expandedCourse}
           addCourse={addCourse}
-          preReqOptions={preReqOptions}
-          setPreReqOptions={setPreReqOptions}
-          preReqStatus={preReqStatus}
-          setPreReqStatus={setPreReqStatus}
-          getPreqExpression={getPreqExpression}
-          getCourseDescription={getCourseDescription}
+          setExpandedCourse={setExpandedCourse}
         />
       )}
 
@@ -763,7 +672,8 @@ const App = () => {
                 />
                 <p>Loading more classes, hang tight.</p>
               </div>
-            }>
+            }
+          >
             {filteredCourses.slice(0, numberOfCoursesRendered).map((course) => (
               <Course
                 course={course}
